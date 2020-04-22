@@ -29,8 +29,8 @@ def nns(db_host, db_user, db_pass, db_name, limit=None):
         cur.execute(query)
     else:
         # couldn't use %s for this not sure why
-        query += ' limit 50'
-        cur.execute(query, (limit))
+        query += ' limit %s'
+        cur.execute(query, (limit,))
     while True:
         res = cur.fetchone()
         if res is None:
@@ -52,7 +52,7 @@ def nns_by_word(db_host, db_user, db_pass, db_name, query_word):
     query = 'SELECT wv2.name, word_nns.precedence, word_nns.neighbor_rank ' \
             'from wordvec wv1, wordvec wv2, word_nns where wv1.id = word_nns.wordid ' \
             'and wv2.id = word_nns.neighborid and wv1.name = %s'
-    cur.execute(query, (query_word))
+    cur.execute(query, (query_word,))
     while True:
         res = cur.fetchone()
         if res is None:
@@ -74,8 +74,8 @@ def histos(db_host, db_user, db_pass, db_name, limit=None):
     if limit is None:
         cur.execute(query)
     else:
-        query += ' limit = %s'
-        cur.execute(query, (limit))
+        query += ' limit %s'
+        cur.execute(query, (limit,))
     while True:
         res = cur.fetchone()
         if res is None:
@@ -93,7 +93,7 @@ def histo_by_word(db_host, db_user, db_pass, db_name, word):
     cur = con.cursor()
     query = 'SELECT word_histo.year, word_histo.count from wordvec, word_histo' \
             'where wordvec.id = word_histo.word_id and wordvec.word = %s'
-    cur.execute(query, (word))
+    cur.execute(query, (word,))
     while True:
         res = cur.fetchone()
         if res is None:
@@ -124,9 +124,8 @@ def word_freqs(db_host, db_user, db_pass, db_name, limit = None):
         cur.execute(query)
     else:
         #XXX having the limit as %s didn't work for some reason
-        query += ' LIMIT 50'
-        print(query)
-        cur.execute(query, limit)
+        query += ' LIMIT %s'
+        cur.execute(query, (limit,))
     cur_artistID = con2.cursor() # separate cursor to keep results separate
     while True:
         res = cur.fetchone()
@@ -160,7 +159,7 @@ def word_freqs_by_word(db_host, db_user, db_pass, db_name, word):
     query = 'SELECT top_user_1, top_user_2, top_user_3, top_user_4, ' \
             'top_user_5, top_user_1_count, top_user_2_count, top_user_3_count, ' \
             'top_user_4_count, top_user_5_count FROM wordvec WHERE word = %s'
-    cur.execute(query, word)
+    cur.execute(query, (word,))
     res = cur.fetchone()
     #XXX do we wanna like, clear the cursor here
     if res is not None:
