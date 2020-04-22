@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
-import mysql.connection as mysql
+import mysql.connector as mysql
+
+import json
 
 # CREATE TABLE `word_histo` (
 #     `word_year_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -16,38 +18,39 @@ import mysql.connection as mysql
 #     `distance` DOUBLE)
 
 def nns(db_host, db_user, db_pass, db_name, limit=None):
-    json = {}
+    json_data = {}
     con = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
             database=db_name)
     cur = con.cursor()
-    query = 'SELECT wv1.name, wv2.name, word_nns.precedence, word_nns.neighbor_rank '
-            'from wordvec wv1, wordvec wv2, word_nns where wv1.id = word_nns.wordid '
+    query = 'SELECT wv1.word, wv2.word, word_nns.neighbor_rank, word_nns.distance ' \
+            'from wordvec wv1, wordvec wv2, word_nns where wv1.id = word_nns.wordid ' \
             'and wv2.id = word_nns.neighborid'
     if limit is None:
         cur.execute(query)
     else:
-        query += ' limit = %s'
+        # couldn't use %s for this not sure why
+        query += ' limit 50'
         cur.execute(query, (limit))
     while True:
         res = cur.fetchone()
         if res is None:
             break
         word, neighbor, precedence, distance = res
-        if word not in json:
-            json[word] = []
-        while len(json[word]) <= precedence:
-            json[word].append(None)
-        json[word][precedence] = {'neighbor': neighbor, 'distance': distance}
-    return json
+        if word not in json_data:
+            json_data[word] = []
+        while len(json_data[word]) <= precedence:
+            json_data[word].append(None)
+        json_data[word][precedence] = {'neighbor': neighbor, 'distance': distance}
+    return json_data
 
 
 def nns_by_word(db_host, db_user, db_pass, db_name, query_word):
-    json = []
+    json_data = []
     con = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
             database=db_name)
     cur = con.cursor()
-    query = 'SELECT wv2.name, word_nns.precedence, word_nns.neighbor_rank '
-            'from wordvec wv1, wordvec wv2, word_nns where wv1.id = word_nns.wordid '
+    query = 'SELECT wv2.name, word_nns.precedence, word_nns.neighbor_rank ' \
+            'from wordvec wv1, wordvec wv2, word_nns where wv1.id = word_nns.wordid ' \
             'and wv2.id = word_nns.neighborid and wv1.name = %s'
     cur.execute(query, (query_word))
     while True:
@@ -55,18 +58,18 @@ def nns_by_word(db_host, db_user, db_pass, db_name, query_word):
         if res is None:
             break
         neighbor, precedence, distance = res
-        while len(json) <= precedence:
-            json.append(None)
-        json[precedence] = {'neighbor': neighbor, 'distance': distance}
-    return json
+        while len(json_data) <= precedence:
+            json_data.append(None)
+        json_data[precedence] = {'neighbor': neighbor, 'distance': distance}
+    return json_data
 
 
 def histos(db_host, db_user, db_pass, db_name, limit=None):
-    json = {}
+    json_data = {}
     con = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
             database=db_name)
     cur = con.cursor()
-    query = 'SELECT wordvec.word, word_histo.year, word_histo.count from '
+    query = 'SELECT wordvec.word, word_histo.year, word_histo.count from ' \
             'wordvec, word_histo where wordvec.id = word_histo.word_id'
     if limit is None:
         cur.execute(query)
@@ -78,17 +81,17 @@ def histos(db_host, db_user, db_pass, db_name, limit=None):
         if res is None:
             break
         word, year, count = res
-        if word not in json:
-            json[word] = []
-        json[word].append({'year': year, 'count': count})
-    return json
+        if word not in json_data:
+            json_data[word] = []
+        json_data[word].append({'year': year, 'count': count})
+    return json_data
 
 def histo_by_word(db_host, db_user, db_pass, db_name, word):
-    json = []
+    json_data = []
     con = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
             database=db_name)
     cur = con.cursor()
-    query = 'SELECT word_histo.year, word_histo.count from wordvec, word_histo'
+    query = 'SELECT word_histo.year, word_histo.count from wordvec, word_histo' \
             'where wordvec.id = word_histo.word_id and wordvec.word = %s'
     cur.execute(query, (word))
     while True:
@@ -96,31 +99,33 @@ def histo_by_word(db_host, db_user, db_pass, db_name, word):
         if res is None:
             break
         year, count = res
-        json.append({'year': year, 'count': count})
-    return json
+        json_data.append({'year': year, 'count': count})
+    return json_data
 
 
-def json_to_file(filename, json):
+def json_to_file(json_data, filename):
     with open(filename, 'w') as outfile:
-        outfile.write(json.dumps())
+        outfile.write(json.dumps(json_data))
 
 
 def word_freqs(db_host, db_user, db_pass, db_name, limit = None):
     #TODO maybe sort json in descending order of most popular words (or at
     # least most popular in terms of top5)?
-    json = {}
+    json_data = {}
     con = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
             database=db_name)
     con2 = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
             database=db_name)
     cur = con.cursor()
-    query = 'SELECT word, top_user_1, top_user_2, top_user_3, top_user_4, '
-    'top_user_5, top_user_1_count, top_user_2_count, top_user_3_count, '
-    'top_user_4_count, top_user_5_count FROM wordvec'
+    query = 'SELECT word, top_user_1, top_user_2, top_user_3, top_user_4, ' \
+            'top_user_5, top_user_1_count, top_user_2_count, top_user_3_count, ' \
+            'top_user_4_count, top_user_5_count FROM wordvec'
     if limit is None:
         cur.execute(query)
     else:
-        query += ' LIMIT %s'
+        #XXX having the limit as %s didn't work for some reason
+        query += ' LIMIT 50'
+        print(query)
         cur.execute(query, limit)
     cur_artistID = con2.cursor() # separate cursor to keep results separate
     while True:
@@ -129,29 +134,31 @@ def word_freqs(db_host, db_user, db_pass, db_name, limit = None):
             break
         word = res[0]
         print(word)
-        json[word] = []
+        json_data[word] = []
         for i in range(1, len(res) - 5):
             artistID = res[i]
+            if artistID is None:
+                break
             cur_artistID.execute('SELECT artist FROM artist WHERE artistid=%s',
                     (artistID,))
             artist = cur_artistID.fetchone()[0]
             count = res[i + 5]
             print('    %s: %d' % (artist, count))
-            json[word].append({'artist': artist, 'count': count})
+            json_data[word].append({'artist': artist, 'count': count})
     con.close()
     con2.close()
-    return json
+    return json_data
 
 
 def word_freqs_by_word(db_host, db_user, db_pass, db_name, word):
-    #TODO maybe sort json in descending order of most popular words (or at
+    #TODO maybe sort json_data in descending order of most popular words (or at
     # least most popular in terms of top5)?
-    json = []
+    json_data = []
     con = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
             database=db_name)
     cur = con.cursor()
-    query = 'SELECT top_user_1, top_user_2, top_user_3, top_user_4, '
-            'top_user_5, top_user_1_count, top_user_2_count, top_user_3_count, '
+    query = 'SELECT top_user_1, top_user_2, top_user_3, top_user_4, ' \
+            'top_user_5, top_user_1_count, top_user_2_count, top_user_3_count, ' \
             'top_user_4_count, top_user_5_count FROM wordvec WHERE word = %s'
     cur.execute(query, word)
     res = cur.fetchone()
@@ -164,10 +171,10 @@ def word_freqs_by_word(db_host, db_user, db_pass, db_name, word):
             artist = cur_artistID.fetchone()[0]
             count = res[i + 5]
             print('    %s: %d' % (artist, count))
-            json.append({'artist': artist, 'count': count})
+            json_data.append({'artist': artist, 'count': count})
     con.close()
     con2.close()
-    return json
+    return json_data
 
 
 if __name__=="__main__":
@@ -176,11 +183,11 @@ if __name__=="__main__":
     db_pass = 'apassword'
     db_name = 'rap_5'
     
-    histos_json = histos(db_host, db_user, db_pass, db_name, 50)
-    json_to_file(histos_json, 'some_histos.json')
+    # histos_json = histos(db_host, db_user, db_pass, db_name, 50)
+    # json_to_file(histos_json, 'some_histos.json')
 
     nns_json = nns(db_host, db_user, db_pass, db_name, 50)
     json_to_file(nns_json, 'some_nns.json')
 
-    word_freqs_json = word_freqs(db_host, db_user, db_pass, db_name, 50)
-    json_to_file(word_freqs_json, 'some_word_freqs.json')
+    # word_freqs_json = word_freqs(db_host, db_user, db_pass, db_name, 50)
+    # json_to_file(word_freqs_json, 'some_word_freqs.json')
