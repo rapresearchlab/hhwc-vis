@@ -70,7 +70,7 @@ def histos(db_host, db_user, db_pass, db_name, limit=None):
             database=db_name)
     cur = con.cursor()
     query = 'SELECT wordvec.word, word_histo.year, word_histo.count from ' \
-            'wordvec, word_histo where wordvec.id = word_histo.word_id'
+            'wordvec, word_histo where wordvec.id = word_histo.wordid'
     if limit is None:
         cur.execute(query)
     else:
