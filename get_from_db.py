@@ -133,7 +133,7 @@ def json_to_file(json_data, filename):
 def word_freqs(db_host, db_user, db_pass, db_name, limit = None):
     #TODO maybe sort json in descending order of most popular words (or at
     # least most popular in terms of top5)?
-    json_data = {}
+    json_data = []
     con = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
             database=db_name)
     con2 = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
@@ -154,8 +154,10 @@ def word_freqs(db_host, db_user, db_pass, db_name, limit = None):
         if res is None:
             break
         word = res[0]
+        word_data = {}
+        word_data['word'] = word;
+        word_data['freqs'] = []
         print(word)
-        json_data[word] = []
         for i in range(1, len(res) - 5):
             artistID = res[i]
             if artistID is None:
@@ -165,7 +167,8 @@ def word_freqs(db_host, db_user, db_pass, db_name, limit = None):
             artist = cur_artistID.fetchone()[0]
             count = res[i + 5]
             print('    %s: %d' % (artist, count))
-            json_data[word].append({'artist': artist, 'count': count})
+            word_data['freqs'].append({'artist': artist, 'count': count})
+        json_data.append(word_data)
     con.close()
     con2.close()
     return json_data
