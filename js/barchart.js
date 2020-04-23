@@ -1,35 +1,65 @@
-function make_bar_chart(data) {
-  var size = 200;
-  var longest_bar = data[0].count;
-
-  const div = d3.create("div")
-      .style("font", "10px sans-serif")
-      .style("text-align", "right")
-      .style("color", "white");
-
-  div.selectAll("div")
-    .data(data)
-    .join("div")
-      .style("background", "steelblue")
-      .style("padding", "3px")
-      .style("margin", "1px")
-      .style("width", d => `${d.count * 300 / longest_bar}px`)
-      .text(d => d.artist);
-
-  return div.node();
-}
-
 $(document).ready(function() {
-  var barch;
-  $.getJSON('some_word_freqs.json', function(json) {
-    some_freqs = json;
 
-    for (var i=0; i < some_freqs.length; i++) {
-      title = document.createElement("p");
-      title.innerHTML = some_freqs[i].word;
-      document.body.appendChild(title);
-      barch = make_bar_chart(some_freqs[i].freqs);
-      document.body.appendChild( barch); 
+  // set the dimensions and margins of the graph
+  var margin = {top: 20, right: 30, bottom: 40, left: 90},
+      width = 300 - margin.left - margin.right,
+      height = 120 - margin.top - margin.bottom;
+
+  function make_barch(data, svg) {
+    var biggest_bar = data[0].count;
+
+    // Add X axis
+    var x = d3.scaleLinear()
+      .domain([0, biggest_bar])
+      .range([ 0, width]);
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x))
+      .selectAll("text")
+        .attr("transform", "translate(-10,0)rotate(-45)")
+        .style("text-anchor", "end");
+
+    // Y axis
+    var y = d3.scaleBand()
+      .range([ 0, height ])
+      .domain(data.map(function(d) { return d.artist; }))
+      .padding(.1);
+    svg.append("g")
+      .call(d3.axisLeft(y))
+
+    //Bars
+    svg.selectAll("myRect")
+      .data(data)
+      .enter()
+      .append("rect")
+      .attr("x", x(0) )
+      .attr("y", function(d) { return y(d.artist); })
+      .attr("width", function(d) { return x(d.count); })
+      .attr("height", y.bandwidth() )
+      .attr("fill", "#69b3a2")
+  }
+
+  function add_barch(datum) {
+    // based on https://www.d3-graph-gallery.com/graph/barplot_horizontal.html
+
+    $('#my_dataviz').append('<br/><span>' + datum.word + '</span><br/>');
+
+    // append the svg object to the body of the page
+    var svg = d3.select("#my_dataviz")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+
+    make_barch(datum.freqs, svg);
+  }
+
+  $.getJSON('some_word_freqs.json', function(myfreqs) {
+
+    for (var i=0; i < myfreqs.length; i++) {
+      add_barch(myfreqs[i]);
     };
   });
 })
