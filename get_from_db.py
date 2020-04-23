@@ -6,7 +6,7 @@ import json
 
 # CREATE TABLE `word_histo` (
 #     `word_year_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-#     `word_id` INT(11),
+#     `wordid` INT(11),
 #     `year` INT(5),
 #     `count` INT(11))
 # 
@@ -91,8 +91,8 @@ def histo_by_word(db_host, db_user, db_pass, db_name, word):
     con = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
             database=db_name)
     cur = con.cursor()
-    query = 'SELECT word_histo.year, word_histo.count from wordvec, word_histo' \
-            'where wordvec.id = word_histo.word_id and wordvec.word = %s'
+    query = 'SELECT word_histo.year, word_histo.count from wordvec, word_histo ' \
+            'where wordvec.id = word_histo.wordid and wordvec.word = %s'
     cur.execute(query, (word,))
     while True:
         res = cur.fetchone()
