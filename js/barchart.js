@@ -1,4 +1,7 @@
 function make_bar_chart(data) {
+  var size = 200;
+  var longest_bar = data[0].count;
+
   const div = d3.create("div")
       .style("font", "10px sans-serif")
       .style("text-align", "right")
@@ -10,14 +13,13 @@ function make_bar_chart(data) {
       .style("background", "steelblue")
       .style("padding", "3px")
       .style("margin", "1px")
-      .style("width", d => `${d.count}px`)
+      .style("width", d => `${d.count * 300 / longest_bar}px`)
       .text(d => d.artist);
 
   return div.node();
 }
 
 $(document).ready(function() {
-
   var barch;
   $.getJSON('some_word_freqs.json', function(json) {
     some_freqs = json;
@@ -30,5 +32,4 @@ $(document).ready(function() {
       document.body.appendChild( barch); 
     };
   });
-
 })
