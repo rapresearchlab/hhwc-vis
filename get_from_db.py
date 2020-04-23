@@ -103,6 +103,28 @@ def histo_by_word(db_host, db_user, db_pass, db_name, word):
     return json_data
 
 
+def histo_by_some_words(db_host, db_user, db_pass, db_name, limit = None):
+    json_data = {}
+    con = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
+            database=db_name)
+    cur = con.cursor()
+    query = 'SELECT word from wordvec'
+    if limit is None:
+        cur.execute(query)
+    else:
+        query += ' limit %s'
+        cur.execute(query, (limit,))
+    while True:
+        res = cur.fetchone()
+        if res is None:
+            break
+        word = res[0]
+        print(word)
+        json_data[word] = histo_by_word(db_host, db_user, db_pass, db_name, word)
+    con.close()
+    return json_data
+
+
 def json_to_file(json_data, filename):
     with open(filename, 'w') as outfile:
         outfile.write(json.dumps(json_data))
