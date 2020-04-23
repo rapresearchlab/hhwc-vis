@@ -4,13 +4,13 @@ import mysql.connector as mysql
 
 import json
 
-# CREATE TABLE `word_histo` (
+# CREATE TABLE `word_histogram` (
 #     `word_year_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
 #     `wordid` INT(11),
 #     `year` INT(5),
 #     `count` INT(11))
 # 
-# CREATE TABLE `word_nns` (
+# CREATE TABLE `word_nearest_neighbors` (
 #     `word_nn_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
 #     `wordid` INT(11),
 #     `neighborid` INT(11),
@@ -22,9 +22,9 @@ def nns(db_host, db_user, db_pass, db_name, limit=None):
     con = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
             database=db_name)
     cur = con.cursor()
-    query = 'SELECT wv1.word, wv2.word, word_nns.neighbor_rank, word_nns.distance ' \
-            'from wordvec wv1, wordvec wv2, word_nns where wv1.id = word_nns.wordid ' \
-            'and wv2.id = word_nns.neighborid'
+    query = 'SELECT wv1.word, wv2.word, nns.neighbor_rank, nns.distance from ' \
+            'wordvec wv1, wordvec wv2, word_nearest_neighbors nns where ' \
+            'wv1.id = nns.wordid and wv2.id = nns.neighborid'
     if limit is None:
         cur.execute(query)
     else:
@@ -49,9 +49,9 @@ def nns_by_word(db_host, db_user, db_pass, db_name, query_word):
     con = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
             database=db_name)
     cur = con.cursor()
-    query = 'SELECT wv2.name, word_nns.precedence, word_nns.neighbor_rank ' \
-            'from wordvec wv1, wordvec wv2, word_nns where wv1.id = word_nns.wordid ' \
-            'and wv2.id = word_nns.neighborid and wv1.name = %s'
+    query = 'SELECT wv2.name, nns.precedence, nns.neighbor_rank from wordvec ' \
+            'wv1, wordvec wv2, word_nearest_neighbors nns where wv1.id = nns.wordid ' \
+            'and wv2.id = nns.neighborid and wv1.name = %s'
     cur.execute(query, (query_word,))
     while True:
         res = cur.fetchone()
@@ -69,8 +69,8 @@ def histos(db_host, db_user, db_pass, db_name, limit=None):
     con = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
             database=db_name)
     cur = con.cursor()
-    query = 'SELECT wordvec.word, word_histo.year, word_histo.count from ' \
-            'wordvec, word_histo where wordvec.id = word_histo.wordid'
+    query = 'SELECT wordvec.word, wh.year, wh.count from ' \
+            'wordvec, word_histogram wh where wordvec.id = wh.wordid'
     if limit is None:
         cur.execute(query)
     else:
@@ -91,8 +91,8 @@ def histo_by_word(db_host, db_user, db_pass, db_name, word):
     con = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
             database=db_name)
     cur = con.cursor()
-    query = 'SELECT word_histo.year, word_histo.count from wordvec, word_histo ' \
-            'where wordvec.id = word_histo.wordid and wordvec.word = %s'
+    query = 'SELECT wh.year, wh.count from wordvec, word_histogram wh ' \
+            'where wordvec.id = wh.wordid and wordvec.word = %s'
     cur.execute(query, (word,))
     while True:
         res = cur.fetchone()
