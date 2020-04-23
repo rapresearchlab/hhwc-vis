@@ -175,8 +175,6 @@ def word_freqs(db_host, db_user, db_pass, db_name, limit = None):
 
 
 def word_freqs_by_word(db_host, db_user, db_pass, db_name, word):
-    #TODO maybe sort json_data in descending order of most popular words (or at
-    # least most popular in terms of top5)?
     json_data = []
     con = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
             database=db_name)
