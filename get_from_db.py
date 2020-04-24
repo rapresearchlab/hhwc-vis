@@ -65,7 +65,10 @@ def nns_by_word(db_host, db_user, db_pass, db_name, query_word):
 
 
 def histos(db_host, db_user, db_pass, db_name, limit=None):
-    json_data = {}
+    # XXX this doesn't get data by artist, it just gets db lines,
+    #  so it doesn't get full histogram for a given artist; hence
+    #  somewhat useless
+    json_data = []
     con = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
             database=db_name)
     cur = con.cursor()
@@ -81,9 +84,14 @@ def histos(db_host, db_user, db_pass, db_name, limit=None):
         if res is None:
             break
         word, year, count = res
-        if word not in json_data:
-            json_data[word] = []
-        json_data[word].append({'year': year, 'count': count})
+        var i=0;
+        for i in range(len(json_data)):
+            if json_data[i]['word'] == word:
+                datum['histo'].append({'year': year, 'count': count})
+                break
+            if i == len(json_data) - 1:
+                # we're at the end so this histo is new
+                json_data[i]['histo'] = []
     return json_data
 
 def histo_by_word(db_host, db_user, db_pass, db_name, word):
@@ -104,7 +112,7 @@ def histo_by_word(db_host, db_user, db_pass, db_name, word):
 
 
 def histo_by_some_words(db_host, db_user, db_pass, db_name, limit = None):
-    json_data = {}
+    json_data = []
     con = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
             database=db_name)
     cur = con.cursor()
@@ -120,7 +128,9 @@ def histo_by_some_words(db_host, db_user, db_pass, db_name, limit = None):
             break
         word = res[0]
         print(word)
-        json_data[word] = histo_by_word(db_host, db_user, db_pass, db_name, word)
+        json_datum = {'word': word, 'histo': histo_by_word(db_host, db_user,
+            db_pass, db_name, word)}
+        json_data.append(json_datum)
     con.close()
     return json_data
 
