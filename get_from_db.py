@@ -84,7 +84,6 @@ def histos(db_host, db_user, db_pass, db_name, limit=None):
         if res is None:
             break
         word, year, count = res
-        var i=0;
         for i in range(len(json_data)):
             if json_data[i]['word'] == word:
                 datum['histo'].append({'year': year, 'count': count})
@@ -132,6 +131,14 @@ def histo_by_some_words(db_host, db_user, db_pass, db_name, limit = None):
             db_pass, db_name, word)}
         json_data.append(json_datum)
     con.close()
+    return json_data
+
+
+def histo_by_word_list(db_host, db_user, db_pass, db_name, words):
+    json_data = []
+    for word in words:
+        json_data.append({'word': word, 'histo':
+            histo_by_word(db_host, db_user, db_pass, db_name, word)});
     return json_data
 
 
@@ -200,14 +207,27 @@ def word_freqs_by_word(db_host, db_user, db_pass, db_name, word):
             artistID = res[i]
             cur.execute('SELECT artist FROM artist WHERE artistid=%s',
                     (artistID,))
-            artist = cur_artistID.fetchone()[0]
+            artist = cur.fetchone()[0]
             count = res[i + 5]
             print('    %s: %d' % (artist, count))
             json_data.append({'artist': artist, 'count': count})
     con.close()
-    con2.close()
     return json_data
 
+
+def freqs_by_word_list(db_host, db_user, db_pass, db_name, words):
+    json_data = []
+    for word in words:
+        json_data.append({'word': word, 'freqs':
+            word_freqs_by_word(db_host, db_user, db_pass, db_name, word)});
+    return json_data
+
+
+# words that might have either interesting histo or interesting top artists
+some_sample_words = ['jump', 'iphone', 'insta', 'snapchat', 'iraq', 'palestine',
+        'drip', 'slatt', 'snoop', 'chronic', 'insta', 'snapchat', 'jiggy', 'cadillac',
+        'basedgod', 'yeezy', 'love', 'death', 'compton', 'rosecrans', 'east', 'west',
+        'dance', 'rhyme', 'turntables', 'microphone']
 
 if __name__=="__main__":
     db_host = 'localhost'
@@ -215,11 +235,19 @@ if __name__=="__main__":
     db_pass = 'apassword'
     db_name = 'rap_5'
     
-    # histos_json = histos(db_host, db_user, db_pass, db_name, 50)
+    # histos_json = histo_by_some_words(db_host, db_user, db_pass, db_name, 50)
     # json_to_file(histos_json, 'some_histos.json')
 
-    nns_json = nns(db_host, db_user, db_pass, db_name, 50)
-    json_to_file(nns_json, 'some_nns.json')
+    # nns_json = nns(db_host, db_user, db_pass, db_name, 50)
+    # json_to_file(nns_json, 'some_nns.json')
 
     # word_freqs_json = word_freqs(db_host, db_user, db_pass, db_name, 50)
     # json_to_file(word_freqs_json, 'some_word_freqs.json')
+
+    sample_word_freqs = freqs_by_word_list(db_host, db_user, db_pass, db_name,
+            some_sample_words)
+    json_to_file(sample_word_freqs, 'good_freqs.json')
+
+    sample_histos = histo_by_word_list(db_host, db_user, db_pass, db_name,
+            some_sample_words)
+    json_to_file(sample_histos, 'good_histos.json')
