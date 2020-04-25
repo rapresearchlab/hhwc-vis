@@ -143,17 +143,6 @@ $(document).ready(function() {
           .attr("text-anchor", "left")
           .attr("alignment-baseline", "middle")
 
-      // Create a rect on top of the svg area: this rectangle recovers mouse position
-      svg
-        .append('rect')
-        .style("fill", "none")
-        .style("pointer-events", "all")
-        .attr('width', width)
-        .attr('height', height)
-        .on('mouseover', mouseover)
-        .on('mousemove', mousemove)
-        .on('mouseout', mouseout);
-
       // Add the line
       svg
         .append("path")
@@ -165,6 +154,17 @@ $(document).ready(function() {
           .x(function(d) { return x(d.year) })
           .y(function(d) { return y(d.count) })
           )
+
+      // Create a rect on top of the svg area: this rectangle recovers mouse position
+      svg
+        .append('rect')
+        .style("fill", "none")
+        .style("pointer-events", "all")
+        .attr('width', width)
+        .attr('height', height)
+        .on('mouseover', mouseover)
+        .on('mousemove', mousemove)
+        .on('mouseout', mouseout);
 
 
       // What happens when the mouse move -> show the annotations at the right positions.
