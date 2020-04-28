@@ -1,2 +1,3 @@
 some_*.json
 *.swp
+.venv
