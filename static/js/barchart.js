@@ -69,9 +69,13 @@ $(document).ready(function() {
         console.log('3');
         for (var i=0; i < histos.length; i++) {
           $('#my_dataviz').append('<br/><span>' + histos[i].word + '</span><br/>');
-          add_barch(myfreqs[i]);
-          if (i < histos.length) {
-            add_histo(histos[i].histo);
+          if (myfreqs[i].freqs.length > 0) {
+            add_barch(myfreqs[i]);
+            if (i < histos.length) {
+              add_histo(histos[i].histo);
+            }
+          } else {
+            $('#my_dataviz').append('<span style="color:red">no data</span><br/>');
           }
         }
       });
@@ -88,7 +92,6 @@ $(document).ready(function() {
     console.log(data);
     for (var i=0; i<data.length; i++) {
       count = data[i].count;
-      console.log(count);
       if (count < yMin) {
         yMin = count;
       }
