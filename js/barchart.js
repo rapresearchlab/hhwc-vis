@@ -56,16 +56,25 @@ $(document).ready(function() {
     make_barch(datum.freqs, svg);
   }
 
-
-  $.getJSON('good_freqs.json', function(myfreqs) {
-    $.getJSON('good_histos.json', function(histos) {
-      for (var i=0; i < histos.length; i++) {
-        $('#my_dataviz').append('<br/><span>' + histos[i].word + '</span><br/>');
-        add_barch(myfreqs[i]);
-        if (i < histos.length) {
-          add_histo(histos[i].histo);
+  $("#myBtn").click(function(){
+    var text_input = $("#myInput").val();
+    console.log('1');
+    $.getJSON($SCRIPT_ROOT + '/_get_top5s', {
+        words: text_input
+    }, function(myfreqs) {
+      console.log('2');
+      $.getJSON($SCRIPT_ROOT + '/_get_histos', {
+          words: text_input
+      }, function(histos) {
+        console.log('3');
+        for (var i=0; i < histos.length; i++) {
+          $('#my_dataviz').append('<br/><span>' + histos[i].word + '</span><br/>');
+          add_barch(myfreqs[i]);
+          if (i < histos.length) {
+            add_histo(histos[i].histo);
+          }
         }
-      }
+      });
     });
   });
 

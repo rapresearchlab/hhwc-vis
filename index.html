@@ -4,11 +4,16 @@
         <meta charset="utf-8">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.js"></script>
         <script src="https://d3js.org/d3.v4.js"></script>
-        <script src="js/barchart.js"></script>
+        <script src="static/js/barchart.js"></script>
+        <script type=text/javascript>
+          $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+        </script>
 
     </head>
     <body>
         <h1>Rap Datavis</h1>
+        <input type="text" id="myInput">
+        <button type="button" id="myBtn">Show Value</button>
         <div id="my_dataviz"></div>
     </body>
 </html>
