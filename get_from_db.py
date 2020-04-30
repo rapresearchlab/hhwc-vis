@@ -64,6 +64,39 @@ def nns_by_word(db_host, db_user, db_pass, db_name, query_word):
     return json_data
 
 
+def nn_coords_by_word(db_host, db_user, db_pass, db_name, query_word):
+    json_data = {}
+    con = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
+            database=db_name)
+    cur = con.cursor()
+    query = 'SELECT tsne_x, tsne_y, tsne_z from wordvec where word = %s'
+    cur.execute(query, (query_word,))
+    target_x, target_y, target_z = cur.fetchone()
+    json_data['target_coords'] = {'x': target_x, 'y': target_y, 'z': target_z}
+    # store the TSNE coords in the response.  ALSO, get the target coords
+    query = 'SELECT wv2.word, wv2.tsne_x, wv2.tsne_y, wv2.tsne_z from wordvec ' \
+            'wv_target, wordvec wv_nn, word_nearest_neighbors nns where ' \
+            'wv_target.id = nns.wordid and wv_nn.id = nns.neighborid and ' \
+            'wv_target.word = %s'
+    cur.execute(query, (query_word,))
+    json_data['neighbors'] = []
+    while True:
+        res = cur.fetchone()
+        if res is None:
+            break
+        neighbor, x, y, z = res
+        json_data['neighbors'].append({'word': neighbor, 'x': x, 'y': y, 'z': z})
+    return json_data
+
+
+def nn_coords_by_word_list(db_host, db_user, db_pass, db_name, words):
+    json_data = []
+    for word in words:
+        json_data.append({'word': word, 'nn_coords':
+            nn_coords_by_word(db_host, db_user, db_pass, db_name, word)});
+    return json_data
+
+
 def histos(db_host, db_user, db_pass, db_name, limit=None):
     # XXX this doesn't get data by artist, it just gets db lines,
     #  so it doesn't get full histogram for a given artist; hence
