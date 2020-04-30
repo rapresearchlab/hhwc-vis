@@ -49,9 +49,9 @@ def nns_by_word(db_host, db_user, db_pass, db_name, query_word):
     con = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
             database=db_name)
     cur = con.cursor()
-    query = 'SELECT wv2.name, nns.precedence, nns.neighbor_rank from wordvec ' \
+    query = 'SELECT wv2.word, nns.precedence, nns.neighbor_rank from wordvec ' \
             'wv1, wordvec wv2, word_nearest_neighbors nns where wv1.id = nns.wordid ' \
-            'and wv2.id = nns.neighborid and wv1.name = %s'
+            'and wv2.id = nns.neighborid and wv1.word = %s'
     cur.execute(query, (query_word,))
     while True:
         res = cur.fetchone()
