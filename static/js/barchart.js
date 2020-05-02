@@ -317,7 +317,7 @@ $(document).ready(function() {
         .merge(pointText)
           .attr("x", function(d) {return d.projected.x})
             .attr("y", function(d) {return d.projected.y})
-          .text(function(d) {return 'label'})
+          .text(function(d) {return d.label})
             .attr("font-size", function(d){ return (14 + (d.rotated.z)/ 3) + "px"});
 
         pointText.exit().remove();
@@ -389,6 +389,12 @@ $(document).ready(function() {
             point3d(scatter),
             yScale3d([yLine])
         ];
+
+        //XXX XXX what's with the 5 vs ten thing?  i make ten scatter points
+        // but then data[1] length equals five
+        for (var i=0; i<5; i++) {
+          data[1][i]["label"] = nn_data.nn_coords.neighbors[i].word;
+        }
         processData(data, 1000);
     }
 
