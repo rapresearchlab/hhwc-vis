@@ -67,17 +67,25 @@ $(document).ready(function() {
           words: text_input
       }, function(histos) {
         console.log('3');
-        for (var i=0; i < histos.length; i++) {
-          $('#my_dataviz').append('<br/><span>' + histos[i].word + '</span><br/>');
-          if (myfreqs[i].freqs.length > 0) {
-            add_barch(myfreqs[i]);
-            if (i < histos.length) {
-              add_histo(histos[i].histo);
+        $.getJSON($SCRIPT_ROOT + '/_get_neighbors', {
+            words: text_input
+        }, function(neighbors) {
+          console.log('4');
+          for (var i=0; i < histos.length; i++) {
+            $('#my_dataviz').append('<br/><span>' + histos[i].word + '</span><br/>');
+            if (myfreqs[i].freqs.length > 0) {
+              add_barch(myfreqs[i]);
+              if (i < histos.length) {
+                add_histo(histos[i].histo);
+              }
+              if (i < neighbors.length) {
+                add_nns(neighbors[i]);
+              }
+            } else {
+              $('#my_dataviz').append('<span style="color:red">no data</span><br/>');
             }
-          } else {
-            $('#my_dataviz').append('<span style="color:red">no data</span><br/>');
           }
-        }
+        });
       });
     });
   });
@@ -207,12 +215,34 @@ $(document).ready(function() {
 
   }
 
-  function add_3d_plot(data) {
+  function add_nns(nn_data) {
+    //  nn_data: {
+    //      word,
+    //      nn_coords: {
+    //          target_coords: {x, y, z}
+    //          neighbors: [
+    //              {word, x, y, z}
+    //          ]
+    //      }
+    //  }
     //https://bl.ocks.org/Niekes/1c15016ae5b5f11508f92852057136b5
-    var origin = [480, 300], j = 10, scale = 20, scatter = [], yLine = [], xGrid = [], beta = 0, alpha = 0, key = function(d){ return d.id; }, startAngle = Math.PI/4;
-    var svg    = d3.select('svg').call(d3.drag().on('drag', dragged).on('start', dragStart).on('end', dragEnd)).append('g');
+    var origin = [150, 100], j = 10, scale = 8, scatter = [], yLine = [],
+      xGrid = [], beta = 0, alpha = 0, key = function(d){ return d.id; },
+      startAngle = Math.PI/4;
+    var svg    = d3.select('#my_dataviz').append('svg')
+      .attr("width", 300)
+      .attr("height", 150)
+      .call(d3.drag().on('drag',
+      dragged).on('start', dragStart).on('end', dragEnd)).append('g');
     var color  = d3.scaleOrdinal(d3.schemeCategory20);
     var mx, my, mouseX, mouseY;
+
+    // center data around target word
+    for (var i=0; i < nn_data.nn_coords.neighbors.length; i++) {
+      nn_data.nn_coords.neighbors[i].x -= nn_data.nn_coords.target_coords.x;
+      nn_data.nn_coords.neighbors[i].y -= nn_data.nn_coords.target_coords.y;
+      nn_data.nn_coords.neighbors[i].z -= nn_data.nn_coords.target_coords.z;
+    }
 
     var grid3d = d3._3d()
         .shape('GRID', 20)
@@ -326,7 +356,7 @@ $(document).ready(function() {
 
         yText.exit().remove();
 
-        d3.selectAll('._3d').sort(d3._3d().sort);
+        svg.selectAll('._3d').sort(d3._3d().sort);
     }
 
     function posPointX(d){
@@ -346,12 +376,11 @@ $(document).ready(function() {
             }
         }
 
-        for (var i=0; i<20; i++)
-            scatter.push({x: d3.randomUniform(-10, 10)(),
-                y: d3.randomUniform(0, -10)(), z: d3.randomUniform(-10, 10)(),
+        for (var i=0; i<10; i++)
+            scatter.push({x: nn_data.nn_coords.neighbors[i].x,
+                y: nn_data.nn_coords.neighbors[i].y,
+                z: nn_data.nn_coords.neighbors[i].z,
                 id: 'point_' + i++});
-
-
 
         d3.range(-1, 11, 1).forEach(function(d){ yLine.push([-j, -d, -j]); });
 
@@ -385,8 +414,6 @@ $(document).ready(function() {
         mouseX = d3.event.x - mx + mouseX;
         mouseY = d3.event.y - my + mouseY;
     }
-
-    d3.selectAll('button').on('click', init);
 
     init();
   }
