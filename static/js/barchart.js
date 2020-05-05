@@ -226,12 +226,12 @@ $(document).ready(function() {
     //      }
     //  }
     //https://bl.ocks.org/Niekes/1c15016ae5b5f11508f92852057136b5
-    var origin = [150, 100], j = 10, scale = 8, scatter = [], yLine = [],
+    var origin = [150, 70], j = 10, scale = 8, scatter = [], yLine = [],
       xGrid = [], beta = 0, alpha = 0, key = function(d){ return d.id; },
       startAngle = Math.PI/4;
     var svg    = d3.select('#my_dataviz').append('svg')
       .attr("width", 300)
-      .attr("height", 150)
+      .attr("height", 140)
       .call(d3.drag().on('drag',
       dragged).on('start', dragStart).on('end', dragEnd)).append('g');
     var color  = d3.scaleOrdinal(d3.schemeCategory20);
