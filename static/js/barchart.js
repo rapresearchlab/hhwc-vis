@@ -226,8 +226,8 @@ $(document).ready(function() {
     //      }
     //  }
     //https://bl.ocks.org/Niekes/1c15016ae5b5f11508f92852057136b5
-    var origin = [150, 70], j = 10, scale = 8, scatter = [], yLine = [],
-      xGrid = [], beta = 0, alpha = 0, key = function(d){ return d.id; },
+    var origin = [150, 70], j = 10, scale = 8, scatter = [], xLine = [], yLine = [],
+      zLine = [], beta = 0, alpha = 0, key = function(d){ return d.id; },
       startAngle = Math.PI/4;
     var svg    = d3.select('#my_dataviz').append('svg')
       .attr("width", 300)
@@ -282,26 +282,9 @@ $(document).ready(function() {
 
     function processData(data, tt){
 
-        /* ----------- GRID ----------- */
-
-        var xGrid = svg.selectAll('path.grid').data(data[0], key);
-
-        xGrid
-            .enter()
-            .append('path')
-            .attr('class', '_3d grid')
-            .merge(xGrid)
-            .attr('stroke', 'black')
-            .attr('stroke-width', 0.3)
-            .attr('fill', function(d){ return d.ccw ? 'lightgrey' : '#717171'; })
-            .attr('fill-opacity', 0.9)
-            .attr('d', grid3d.draw);
-
-        xGrid.exit().remove();
-
         /* ----------- POINTS ----------- */
 
-        var points = svg.selectAll('circle').data(data[1], key);
+        var points = svg.selectAll('circle').data(data[0], key);
 
         points
             .enter()
@@ -321,10 +304,10 @@ $(document).ready(function() {
 
         points.exit().remove();
 
-        var pointText = svg.selectAll('text.pointText').data(data[1]);
+        var pointText = svg.selectAll('text.pointText').data(data[0]);
 
         pointText
-          .data(data[1]).enter()
+          .data(data[0]).enter()
           .append("text")
             .attr('class', '_3d pointText')
         .merge(pointText)
@@ -334,6 +317,21 @@ $(document).ready(function() {
             .attr("font-size", function(d){ return (14 + (d.rotated.z)/ 3) + "px"});
 
         pointText.exit().remove();
+
+        /* ----------- x-Scale ----------- */
+
+        var xScale = svg.selectAll('path.xScale').data(data[1]);
+
+        xScale
+            .enter()
+            .append('path')
+            .attr('class', '_3d xScale')
+            .merge(xScale)
+            .attr('stroke', 'black')
+            .attr('stroke-width', 1)
+            .attr('d', yScale3d.draw);
+
+        xScale.exit().remove();
 
         /* ----------- y-Scale ----------- */
 
@@ -345,29 +343,25 @@ $(document).ready(function() {
             .attr('class', '_3d yScale')
             .merge(yScale)
             .attr('stroke', 'black')
-            .attr('stroke-width', .5)
+            .attr('stroke-width', 1)
             .attr('d', yScale3d.draw);
 
         yScale.exit().remove();
 
-         /* ----------- y-Scale Text ----------- */
+        /* ----------- z-Scale ----------- */
 
-        var yText = svg.selectAll('text.yText').data(data[2][0]);
+        var zScale = svg.selectAll('path.zScale').data(data[3]);
 
-        yText
+        zScale
             .enter()
-            .append('text')
-            .attr('class', '_3d yText')
-            .attr('dx', '.3em')
-            .merge(yText)
-            .each(function(d){
-                d.centroid = {x: d.rotated.x, y: d.rotated.y, z: d.rotated.z};
-            })
-            .attr('x', function(d){ return d.projected.x; })
-            .attr('y', function(d){ return d.projected.y; })
-            .text(function(d){ return d[1] <= 0 ? d[1] : ''; });
+            .append('path')
+            .attr('class', '_3d zScale')
+            .merge(zScale)
+            .attr('stroke', 'black')
+            .attr('stroke-width', 1)
+            .attr('d', yScale3d.draw);
 
-        yText.exit().remove();
+        zScale.exit().remove();
 
         svg.selectAll('._3d').sort(d3._3d().sort);
     }
@@ -382,12 +376,7 @@ $(document).ready(function() {
 
     function init(){
         var cnt = 0;
-        xGrid = [], scatter = [], yLine = [];
-        for(var z = -j; z < j; z++){
-            for(var x = -j; x < j; x++){
-                xGrid.push([x, 1, z]);
-            }
-        }
+        scatter = [], yLine = [];
 
         for (var i=0; i < nn_data.nn_coords.neighbors.length; i++) {
             scatter.push(
@@ -397,16 +386,19 @@ $(document).ready(function() {
                 id: 'point_' + i});
         }
 
-        d3.range(-1, 11, 1).forEach(function(d){ yLine.push([-j, -d, -j]); });
+        xLine = [[0,0,0], [j,0,0]];
+        yLine = [[0,0,0], [0,-j,0]];
+        zLine = [[0,0,0], [0,0,j]];
 
         var data = [
-            grid3d(xGrid),
             point3d(scatter),
-            yScale3d([yLine])
+            yScale3d([xLine]),
+            yScale3d([yLine]),
+            yScale3d([zLine]),
         ];
 
-        for (var i=0; i<10; i++) {
-          data[1][i]["label"] = nn_data.nn_coords.neighbors[i].word;
+        for (var i=0; i < nn_data.nn_coords.neighbors.length; i++) {
+          data[0][i]["label"] = nn_data.nn_coords.neighbors[i].word;
         }
         processData(data, 1000);
     }
@@ -422,9 +414,10 @@ $(document).ready(function() {
         beta   = (d3.event.x - mx + mouseX) * Math.PI / 230 ;
         alpha  = (d3.event.y - my + mouseY) * Math.PI / 230  * (-1);
         var data = [
-             grid3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)(xGrid),
             point3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)(scatter),
+            yScale3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)([xLine]),
             yScale3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)([yLine]),
+            yScale3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)([zLine]),
         ];
         processData(data, 0);
     }
