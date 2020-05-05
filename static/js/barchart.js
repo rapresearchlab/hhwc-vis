@@ -376,11 +376,13 @@ $(document).ready(function() {
             }
         }
 
-        for (var i=0; i<10; i++)
-            scatter.push({x: nn_data.nn_coords.neighbors[i].x,
+        for (var i=0; i<10; i++) {
+            scatter.push(
+               {x: nn_data.nn_coords.neighbors[i].x,
                 y: nn_data.nn_coords.neighbors[i].y,
                 z: nn_data.nn_coords.neighbors[i].z,
-                id: 'point_' + i++});
+                id: 'point_' + i});
+        }
 
         d3.range(-1, 11, 1).forEach(function(d){ yLine.push([-j, -d, -j]); });
 
@@ -390,9 +392,7 @@ $(document).ready(function() {
             yScale3d([yLine])
         ];
 
-        //XXX XXX what's with the 5 vs ten thing?  i make ten scatter points
-        // but then data[1] length equals five
-        for (var i=0; i<5; i++) {
+        for (var i=0; i<10; i++) {
           data[1][i]["label"] = nn_data.nn_coords.neighbors[i].word;
         }
         processData(data, 1000);
