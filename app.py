@@ -24,7 +24,7 @@ def some_view(var):
 def get_top5s():
     print('get_top5s')
     words_arg = request.args.get("words")
-    words = words_arg.split(',')
+    words = [w.strip() for w in words_arg.split(',')]
     return json.dumps(get_from_db.freqs_by_word_list(
             app.config.get('db_host'), app.config.get('db_user'),
             app.config.get('db_pass'), app.config.get('db_name'), words))
@@ -33,7 +33,7 @@ def get_top5s():
 @app.route('/_get_histos')
 def get_histos():
     words_arg = request.args.get("words")
-    words = words_arg.split(',')
+    words = [w.strip() for w in words_arg.split(',')]
     return json.dumps(get_from_db.histo_by_word_list(
             app.config.get('db_host'), app.config.get('db_user'),
             app.config.get('db_pass'), app.config.get('db_name'), words))
