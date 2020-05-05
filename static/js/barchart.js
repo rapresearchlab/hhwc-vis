@@ -237,6 +237,8 @@ $(document).ready(function() {
     var color  = d3.scaleOrdinal(d3.schemeCategory20);
     var mx, my, mouseX, mouseY;
 
+    nn_data.nn_coords.neighbors = nn_data.nn_coords.neighbors.slice(0,5);
+
     // center data around target word
     for (var i=0; i < nn_data.nn_coords.neighbors.length; i++) {
       nn_data.nn_coords.neighbors[i].x -= nn_data.nn_coords.target_coords.x;
@@ -376,7 +378,7 @@ $(document).ready(function() {
             }
         }
 
-        for (var i=0; i<10; i++) {
+        for (var i=0; i < nn_data.nn_coords.neighbors.length; i++) {
             scatter.push(
                {x: nn_data.nn_coords.neighbors[i].x,
                 y: nn_data.nn_coords.neighbors[i].y,
