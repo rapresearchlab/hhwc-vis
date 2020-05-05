@@ -39,6 +39,15 @@ def get_histos():
             app.config.get('db_pass'), app.config.get('db_name'), words))
 
 
+@app.route('/_get_neighbors')
+def get_neighbors():
+    words_arg = request.args.get("words")
+    words = words_arg.split(',')
+    return json.dumps(get_from_db.nn_coords_by_word_list(
+            app.config.get('db_host'), app.config.get('db_user'),
+            app.config.get('db_pass'), app.config.get('db_name'), words))
+
+
 if __name__ == "__main__":
     app.config['db_host'] = sys.argv[1]
     app.config['db_user'] = sys.argv[2]

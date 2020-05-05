@@ -67,13 +67,25 @@ $(document).ready(function() {
           words: text_input
       }, function(histos) {
         console.log('3');
-        for (var i=0; i < histos.length; i++) {
-          $('#my_dataviz').append('<br/><span>' + histos[i].word + '</span><br/>');
-          add_barch(myfreqs[i]);
-          if (i < histos.length) {
-            add_histo(histos[i].histo);
+        $.getJSON($SCRIPT_ROOT + '/_get_neighbors', {
+            words: text_input
+        }, function(neighbors) {
+          console.log('4');
+          for (var i=0; i < histos.length; i++) {
+            $('#my_dataviz').append('<br/><span>' + histos[i].word + '</span><br/>');
+            if (myfreqs[i].freqs.length > 0) {
+              add_barch(myfreqs[i]);
+              if (i < histos.length) {
+                add_histo(histos[i].histo);
+              }
+              if (i < neighbors.length) {
+                add_nns(neighbors[i]);
+              }
+            } else {
+              $('#my_dataviz').append('<span style="color:red">no data</span><br/>');
+            }
           }
-        }
+        });
       });
     });
   });
@@ -88,7 +100,6 @@ $(document).ready(function() {
     console.log(data);
     for (var i=0; i<data.length; i++) {
       count = data[i].count;
-      console.log(count);
       if (count < yMin) {
         yMin = count;
       }
@@ -204,4 +215,212 @@ $(document).ready(function() {
 
   }
 
+  function add_nns(nn_data) {
+    //  nn_data: {
+    //      word,
+    //      nn_coords: {
+    //          target_coords: {x, y, z}
+    //          neighbors: [
+    //              {word, x, y, z}
+    //          ]
+    //      }
+    //  }
+    //https://bl.ocks.org/Niekes/1c15016ae5b5f11508f92852057136b5
+    var origin = [150, 100], j = 10, scale = 8, scatter = [], yLine = [],
+      xGrid = [], beta = 0, alpha = 0, key = function(d){ return d.id; },
+      startAngle = Math.PI/4;
+    var svg    = d3.select('#my_dataviz').append('svg')
+      .attr("width", 300)
+      .attr("height", 150)
+      .call(d3.drag().on('drag',
+      dragged).on('start', dragStart).on('end', dragEnd)).append('g');
+    var color  = d3.scaleOrdinal(d3.schemeCategory20);
+    var mx, my, mouseX, mouseY;
+
+    // center data around target word
+    for (var i=0; i < nn_data.nn_coords.neighbors.length; i++) {
+      nn_data.nn_coords.neighbors[i].x -= nn_data.nn_coords.target_coords.x;
+      nn_data.nn_coords.neighbors[i].y -= nn_data.nn_coords.target_coords.y;
+      nn_data.nn_coords.neighbors[i].z -= nn_data.nn_coords.target_coords.z;
+    }
+
+    var grid3d = d3._3d()
+        .shape('GRID', 20)
+        .origin(origin)
+        .rotateY( startAngle)
+        .rotateX(-startAngle)
+        .scale(scale);
+
+    var point3d = d3._3d()
+        .x(function(d){ return d.x; })
+        .y(function(d){ return d.y; })
+        .z(function(d){ return d.z; })
+        .origin(origin)
+        .rotateY( startAngle)
+        .rotateX(-startAngle)
+        .scale(scale);
+
+    var yScale3d = d3._3d()
+        .shape('LINE_STRIP')
+        .origin(origin)
+        .rotateY( startAngle)
+        .rotateX(-startAngle)
+        .scale(scale);
+
+    function processData(data, tt){
+
+        /* ----------- GRID ----------- */
+
+        var xGrid = svg.selectAll('path.grid').data(data[0], key);
+
+        xGrid
+            .enter()
+            .append('path')
+            .attr('class', '_3d grid')
+            .merge(xGrid)
+            .attr('stroke', 'black')
+            .attr('stroke-width', 0.3)
+            .attr('fill', function(d){ return d.ccw ? 'lightgrey' : '#717171'; })
+            .attr('fill-opacity', 0.9)
+            .attr('d', grid3d.draw);
+
+        xGrid.exit().remove();
+
+        /* ----------- POINTS ----------- */
+
+        var points = svg.selectAll('circle').data(data[1], key);
+
+        points
+            .enter()
+            .append('circle')
+            .attr('class', '_3d')
+            .attr('opacity', 0)
+            .attr('cx', posPointX)
+            .attr('cy', posPointY)
+            .merge(points)
+            .transition().duration(tt)
+            .attr('r', 3)
+            .attr('stroke', function(d){ return d3.color(color(d.id)).darker(3); })
+            .attr('fill', function(d){ return color(d.id); })
+            .attr('opacity', 1)
+            .attr('cx', posPointX)
+            .attr('cy', posPointY);
+
+        points.exit().remove();
+
+        var pointText = svg.selectAll('text.pointText').data(data[1]);
+
+        pointText
+          .data(data[1]).enter()
+          .append("text")
+            .attr('class', '_3d pointText')
+        .merge(pointText)
+          .attr("x", function(d) {return d.projected.x})
+            .attr("y", function(d) {return d.projected.y})
+          .text(function(d) {return d.label})
+            .attr("font-size", function(d){ return (14 + (d.rotated.z)/ 3) + "px"});
+
+        pointText.exit().remove();
+
+        /* ----------- y-Scale ----------- */
+
+        var yScale = svg.selectAll('path.yScale').data(data[2]);
+
+        yScale
+            .enter()
+            .append('path')
+            .attr('class', '_3d yScale')
+            .merge(yScale)
+            .attr('stroke', 'black')
+            .attr('stroke-width', .5)
+            .attr('d', yScale3d.draw);
+
+        yScale.exit().remove();
+
+         /* ----------- y-Scale Text ----------- */
+
+        var yText = svg.selectAll('text.yText').data(data[2][0]);
+
+        yText
+            .enter()
+            .append('text')
+            .attr('class', '_3d yText')
+            .attr('dx', '.3em')
+            .merge(yText)
+            .each(function(d){
+                d.centroid = {x: d.rotated.x, y: d.rotated.y, z: d.rotated.z};
+            })
+            .attr('x', function(d){ return d.projected.x; })
+            .attr('y', function(d){ return d.projected.y; })
+            .text(function(d){ return d[1] <= 0 ? d[1] : ''; });
+
+        yText.exit().remove();
+
+        svg.selectAll('._3d').sort(d3._3d().sort);
+    }
+
+    function posPointX(d){
+        return d.projected.x;
+    }
+
+    function posPointY(d){
+        return d.projected.y;
+    }
+
+    function init(){
+        var cnt = 0;
+        xGrid = [], scatter = [], yLine = [];
+        for(var z = -j; z < j; z++){
+            for(var x = -j; x < j; x++){
+                xGrid.push([x, 1, z]);
+            }
+        }
+
+        for (var i=0; i<10; i++)
+            scatter.push({x: nn_data.nn_coords.neighbors[i].x,
+                y: nn_data.nn_coords.neighbors[i].y,
+                z: nn_data.nn_coords.neighbors[i].z,
+                id: 'point_' + i++});
+
+        d3.range(-1, 11, 1).forEach(function(d){ yLine.push([-j, -d, -j]); });
+
+        var data = [
+            grid3d(xGrid),
+            point3d(scatter),
+            yScale3d([yLine])
+        ];
+
+        //XXX XXX what's with the 5 vs ten thing?  i make ten scatter points
+        // but then data[1] length equals five
+        for (var i=0; i<5; i++) {
+          data[1][i]["label"] = nn_data.nn_coords.neighbors[i].word;
+        }
+        processData(data, 1000);
+    }
+
+    function dragStart(){
+        mx = d3.event.x;
+        my = d3.event.y;
+    }
+
+    function dragged(){
+        mouseX = mouseX || 0;
+        mouseY = mouseY || 0;
+        beta   = (d3.event.x - mx + mouseX) * Math.PI / 230 ;
+        alpha  = (d3.event.y - my + mouseY) * Math.PI / 230  * (-1);
+        var data = [
+             grid3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)(xGrid),
+            point3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)(scatter),
+            yScale3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)([yLine]),
+        ];
+        processData(data, 0);
+    }
+
+    function dragEnd(){
+        mouseX = d3.event.x - mx + mouseX;
+        mouseY = d3.event.y - my + mouseY;
+    }
+
+    init();
+  }
 })
