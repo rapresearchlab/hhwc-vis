@@ -246,6 +246,17 @@ $(document).ready(function() {
       nn_data.nn_coords.neighbors[i].z -= nn_data.nn_coords.target_coords.z;
     }
 
+    var mag_max = 0;
+    for (var i=0; i < nn_data.nn_coords.neighbors.length; i++) {
+      var pt = nn_data.nn_coords.neighbors[i];
+      var magnitude = Math.sqrt(pt.x ** 2 + pt.y ** 2 + pt.z ** 2);
+      if (magnitude > mag_max) {
+        mag_max = magnitude;
+      }
+    }
+
+    scale = 100 / mag_max;
+
     var grid3d = d3._3d()
         .shape('GRID', 20)
         .origin(origin)
