@@ -357,7 +357,7 @@ $(document).ready(function() {
             .append('path')
             .attr('class', '_3d yScale')
             .merge(yScale)
-            .attr('stroke', 'blue')
+            .attr('stroke', 'green')
             .attr('stroke-width', 0.75)
             .attr('opacity', 0.75)
             .attr('d', yScale3d.draw);
@@ -373,7 +373,7 @@ $(document).ready(function() {
             .append('path')
             .attr('class', '_3d zScale')
             .merge(zScale)
-            .attr('stroke', 'green')
+            .attr('stroke', 'blue')
             .attr('stroke-width', 0.75)
             .attr('opacity', 0.75)
             .attr('d', yScale3d.draw);
