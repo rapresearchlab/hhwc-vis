@@ -297,9 +297,9 @@ $(document).ready(function() {
             .attr('cy', posPointY)
             .merge(points)
             .transition().duration(tt)
-            .attr('r', 3)
-            .attr('fill', function(d){ return color(d.id); })
-            .attr('opacity', 1)
+            .attr('r', function(d){ return (4 + (d.rotated.z)/ 12) + "px"} )
+            .attr('fill', 'blue')
+            .attr('opacity', 0.7)
             .attr('cx', posPointX)
             .attr('cy', posPointY);
 
