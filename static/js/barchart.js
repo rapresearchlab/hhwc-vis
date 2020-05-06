@@ -342,8 +342,9 @@ $(document).ready(function() {
             .append('path')
             .attr('class', '_3d xScale')
             .merge(xScale)
-            .attr('stroke', 'black')
-            .attr('stroke-width', 1)
+            .attr('stroke', 'red')
+            .attr('stroke-width', 0.75)
+            .attr('opacity', 0.75)
             .attr('d', yScale3d.draw);
 
         xScale.exit().remove();
@@ -357,8 +358,9 @@ $(document).ready(function() {
             .append('path')
             .attr('class', '_3d yScale')
             .merge(yScale)
-            .attr('stroke', 'black')
-            .attr('stroke-width', 1)
+            .attr('stroke', 'blue')
+            .attr('stroke-width', 0.75)
+            .attr('opacity', 0.75)
             .attr('d', yScale3d.draw);
 
         yScale.exit().remove();
@@ -372,8 +374,9 @@ $(document).ready(function() {
             .append('path')
             .attr('class', '_3d zScale')
             .merge(zScale)
-            .attr('stroke', 'black')
-            .attr('stroke-width', 1)
+            .attr('stroke', 'green')
+            .attr('stroke-width', 0.75)
+            .attr('opacity', 0.75)
             .attr('d', yScale3d.draw);
 
         zScale.exit().remove();
