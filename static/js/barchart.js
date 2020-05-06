@@ -226,16 +226,25 @@ $(document).ready(function() {
     //      }
     //  }
     //https://bl.ocks.org/Niekes/1c15016ae5b5f11508f92852057136b5
-    var origin = [150, 70], j = 10, scale = 8, scatter = [], xLine = [], yLine = [],
+    var origin = [100, 70], j = 10, scale = 8, scatter = [], xLine = [], yLine = [],
       zLine = [], beta = 0, alpha = 0, key = function(d){ return d.id; },
-      startAngle = Math.PI/4;
+      startAngle = Math.PI/4, h=140, w = 250;
     var svg    = d3.select('#my_dataviz').append('svg')
-      .attr("width", 300)
-      .attr("height", 140)
+      .attr("width", w)
+      .attr("height", h)
       .call(d3.drag().on('drag',
       dragged).on('start', dragStart).on('end', dragEnd)).append('g');
     var color  = d3.scaleOrdinal(d3.schemeCategory20);
     var mx, my, mouseX, mouseY;
+
+     var borderPath = svg.append("rect")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("height", h)
+      .attr("width", w)
+      .style("stroke", "black")
+      .style("fill", "none")
+      .style("stroke-width", 0.3);
 
     nn_data.nn_coords.neighbors = nn_data.nn_coords.neighbors.slice(0,5);
 
