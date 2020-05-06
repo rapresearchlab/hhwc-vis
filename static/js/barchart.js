@@ -304,19 +304,30 @@ $(document).ready(function() {
 
         points.exit().remove();
 
-        var pointText = svg.selectAll('text.pointText').data(data[0]);
+        var pointText = svg.selectAll('g.pointText').data(data[0]);
 
-        pointText
-          .data(data[0]).enter()
-          .append("text")
+        pointText.enter()
+          .append("g")
             .attr('class', '_3d pointText')
         .merge(pointText)
-          .attr("x", function(d) {return d.projected.x})
-            .attr("y", function(d) {return d.projected.y})
+          .attr('transform', function(d) {return 'translate(' + d.projected.x +', '
+            + d.projected.y + ')'}).selectAll("*").remove();
+
+        pointText.append("rect")
+            .attr('dx', 0)
+            .attr('dy', 0)
+            //hacky approximation for bounding box width
+            .attr("width", function(d) {return d.label.length * 7})
+            .attr("height", 14 )
+            .style("fill", "white");
+
+        pointText.append("text")
+            .attr("dy", 9)
           .text(function(d) {return d.label})
             .attr("font-size", function(d){ return (14 + (d.rotated.z)/ 3) + "px"});
 
         pointText.exit().remove();
+
 
         /* ----------- x-Scale ----------- */
 
@@ -401,6 +412,9 @@ $(document).ready(function() {
           data[0][i]["label"] = nn_data.nn_coords.neighbors[i].word;
         }
         processData(data, 1000);
+        processData(data, 1000);
+        // text wasn't appearing until dragged, so added this extra rotate
+        point3d.rotateY(startAngle).rotateX(startAngle)(scatter);
     }
 
     function dragStart(){
