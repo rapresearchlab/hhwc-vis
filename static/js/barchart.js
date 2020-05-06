@@ -266,13 +266,6 @@ $(document).ready(function() {
 
     scale = 100 / mag_max;
 
-    var grid3d = d3._3d()
-        .shape('GRID', 20)
-        .origin(origin)
-        .rotateY( startAngle)
-        .rotateX(-startAngle)
-        .scale(scale);
-
     var point3d = d3._3d()
         .x(function(d){ return d.x; })
         .y(function(d){ return d.y; })
@@ -312,6 +305,8 @@ $(document).ready(function() {
             .attr('cy', posPointY);
 
         points.exit().remove();
+
+        /* ----------- POINT TEXT ----------- */
 
         var pointText = svg.selectAll('g.pointText').data(data[0]);
 
