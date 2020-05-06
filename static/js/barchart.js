@@ -316,13 +316,11 @@ $(document).ready(function() {
           .attr('transform', function(d) {return 'translate(' + d.projected.x +', '
             + d.projected.y + ')'}).selectAll("*").remove();
 
-        pointText.append("rect")
-            .attr('dx', 0)
-            .attr('dy', 0)
-            //hacky approximation for bounding box width
-            .attr("width", function(d) {return d.label.length * 7})
-            .attr("height", 14 )
-            .style("fill", "white");
+        pointText.append("text")
+            .attr("dy", 9)
+            .attr('class', 'shadow')
+          .text(function(d) {return d.label})
+            .attr("font-size", function(d){ return (14 + (d.rotated.z)/ 3) + "px"});
 
         pointText.append("text")
             .attr("dy", 9)
