@@ -288,6 +288,10 @@ $(document).ready(function() {
 
         var points = svg.selectAll('circle').data(data[0], key);
 
+        var pointSize = function(d) {
+          return 4 + d.rotated.z / 12;
+        }
+
         points
             .enter()
             .append('circle')
@@ -297,7 +301,7 @@ $(document).ready(function() {
             .attr('cy', posPointY)
             .merge(points)
             .transition().duration(tt)
-            .attr('r', function(d){ return (4 + (d.rotated.z)/ 12) + "px"} )
+            .attr('r', function(d) { return pointSize(d) + "px" })
             .attr('fill', 'blue')
             .attr('opacity', 0.7)
             .attr('cx', posPointX)
@@ -317,15 +321,17 @@ $(document).ready(function() {
             + d.projected.y + ')'}).selectAll("*").remove();
 
         pointText.append("text")
-            .attr("dy", 9)
+            .attr("dx", function(d) { return pointSize(d) * 1.2 + "px" })
+            .attr("dy", function(d) { return pointSize(d) * 1.2 + "px" })
             .attr('class', 'shadow')
           .text(function(d) {return d.label})
-            .attr("font-size", function(d){ return (14 + (d.rotated.z)/ 3) + "px"});
+            .attr("font-size", function(d){ return pointSize(d) * 3 + "px"});
 
         pointText.append("text")
-            .attr("dy", 9)
+            .attr("dx", function(d) { return pointSize(d) * 1.2 + "px" })
+            .attr("dy", function(d) { return pointSize(d) * 1.2 + "px" })
           .text(function(d) {return d.label})
-            .attr("font-size", function(d){ return (14 + (d.rotated.z)/ 3) + "px"});
+            .attr("font-size", function(d){ return pointSize(d) * 3 + "px"});
 
         pointText.exit().remove();
 
