@@ -243,7 +243,7 @@ $(document).ready(function() {
       .style("fill", "none")
       .style("stroke-width", 0.3);
 
-    nn_data.neighbors = nn_data.neighbors.slice(0,8);
+    nn_data.neighbors = nn_data.neighbors.slice(0,7);
 
     // center data around target word
     for (var i=0; i < nn_data.neighbors.length; i++) {
