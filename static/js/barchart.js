@@ -399,12 +399,20 @@ $(document).ready(function() {
         var cnt = 0;
         scatter = [], yLine = [];
 
+        scatter.push({
+          x: 0,
+          y: 0,
+          z: 0,
+          label: nn_data.word,
+          id: 'point_0'});
+
         for (var i=0; i < nn_data.nn_coords.neighbors.length; i++) {
             scatter.push(
                {x: nn_data.nn_coords.neighbors[i].x,
                 y: nn_data.nn_coords.neighbors[i].y,
                 z: nn_data.nn_coords.neighbors[i].z,
-                id: 'point_' + i});
+                label: nn_data.nn_coords.neighbors[i].word,
+                id: 'point_' + (i + 1)});
         }
 
         xLine = [[0,0,0], [j,0,0]];
@@ -418,9 +426,6 @@ $(document).ready(function() {
             yScale3d([zLine]),
         ];
 
-        for (var i=0; i < nn_data.nn_coords.neighbors.length; i++) {
-          data[0][i]["label"] = nn_data.nn_coords.neighbors[i].word;
-        }
         processData(data, 1000);
         processData(data, 1000);
         // text wasn't appearing until dragged, so added this extra rotate
