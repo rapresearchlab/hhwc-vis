@@ -38,7 +38,7 @@ $(document).ready(function() {
       .attr("y", function(d) { return y(d.artist); })
       .attr("width", function(d) { return x(d.count); })
       .attr("height", y.bandwidth() )
-      .attr("fill", "#69b3a2")
+      .attr("fill", "#8525e5")
   }
 
   function add_barch(datum) {
@@ -168,7 +168,7 @@ $(document).ready(function() {
         .append("path")
         .datum(data)
         .attr("fill", "none")
-        .attr("stroke", "steelblue")
+        .attr("stroke", "#4e3864")
         .attr("stroke-width", 1.5)
         .attr("d", d3.line()
           .x(function(d) { return x(d.year) })
@@ -299,7 +299,8 @@ $(document).ready(function() {
             .merge(points)
             .transition().duration(tt)
             .attr('r', function(d) { return pointSize(d) + "px" })
-            .attr('fill', 'blue')
+            .attr('fill', function(d) {if (d.id == 'point_0') {return '#8525e5'}
+                else {return '#4e3864'}})
             .attr('opacity', 0.7)
             .attr('cx', posPointX)
             .attr('cy', posPointY);
