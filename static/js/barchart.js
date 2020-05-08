@@ -217,13 +217,10 @@ $(document).ready(function() {
 
   function add_nns(nn_data) {
     //  nn_data: {
-    //      word,
-    //      nn_coords: {
-    //          target_coords: {x, y, z}
-    //          neighbors: [
-    //              {word, x, y, z}
-    //          ]
-    //      }
+    //      query: {word, x, y, z}
+    //      neighbors: [
+    //          {word, x, y, z}
+    //      ]
     //  }
     //https://bl.ocks.org/Niekes/1c15016ae5b5f11508f92852057136b5
     var origin = [100, 70], j = 10, scale = 8, scatter = [], xLine = [], yLine = [],
@@ -246,18 +243,18 @@ $(document).ready(function() {
       .style("fill", "none")
       .style("stroke-width", 0.3);
 
-    nn_data.nn_coords.neighbors = nn_data.nn_coords.neighbors.slice(0,5);
+    nn_data.neighbors = nn_data.neighbors.slice(0,8);
 
     // center data around target word
-    for (var i=0; i < nn_data.nn_coords.neighbors.length; i++) {
-      nn_data.nn_coords.neighbors[i].x -= nn_data.nn_coords.target_coords.x;
-      nn_data.nn_coords.neighbors[i].y -= nn_data.nn_coords.target_coords.y;
-      nn_data.nn_coords.neighbors[i].z -= nn_data.nn_coords.target_coords.z;
+    for (var i=0; i < nn_data.neighbors.length; i++) {
+      nn_data.neighbors[i].x -= nn_data.query.x;
+      nn_data.neighbors[i].y -= nn_data.query.y;
+      nn_data.neighbors[i].z -= nn_data.query.z;
     }
 
     var mag_max = 0;
-    for (var i=0; i < nn_data.nn_coords.neighbors.length; i++) {
-      var pt = nn_data.nn_coords.neighbors[i];
+    for (var i=0; i < nn_data.neighbors.length; i++) {
+      var pt = nn_data.neighbors[i];
       var magnitude = Math.sqrt(pt.x ** 2 + pt.y ** 2 + pt.z ** 2);
       if (magnitude > mag_max) {
         mag_max = magnitude;
@@ -403,15 +400,15 @@ $(document).ready(function() {
           x: 0,
           y: 0,
           z: 0,
-          label: nn_data.word,
+          label: nn_data.query.word,
           id: 'point_0'});
 
-        for (var i=0; i < nn_data.nn_coords.neighbors.length; i++) {
+        for (var i=0; i < nn_data.neighbors.length; i++) {
             scatter.push(
-               {x: nn_data.nn_coords.neighbors[i].x,
-                y: nn_data.nn_coords.neighbors[i].y,
-                z: nn_data.nn_coords.neighbors[i].z,
-                label: nn_data.nn_coords.neighbors[i].word,
+               {x: nn_data.neighbors[i].x,
+                y: nn_data.neighbors[i].y,
+                z: nn_data.neighbors[i].z,
+                label: nn_data.neighbors[i].word,
                 id: 'point_' + (i + 1)});
         }
 
