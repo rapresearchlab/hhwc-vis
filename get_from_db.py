@@ -64,7 +64,7 @@ def nns_by_word(db_host, db_user, db_pass, db_name, query_word):
     return json_data
 
 
-def nn_coords_by_word(db_host, db_user, db_pass, db_name, query_word):
+def nn_coords_by_word(db_host, db_user, db_pass, db_name, query_word, num_nns):
     json_data = {}
     con = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
             database=db_name)
@@ -79,13 +79,13 @@ def nn_coords_by_word(db_host, db_user, db_pass, db_name, query_word):
     json_data['query'] = {'word': query_word, 'x': target_x, 'y': target_y,
             'z': target_z}
     # store the TSNE coords in the response.  ALSO, get the target coords
-    query = 'SELECT wv_nn.word, wv_nn.tsne_x, wv_nn.tsne_y, wv_nn.tsne_z from wordvec ' \
-            'wv_target, wordvec wv_nn, word_nearest_neighbors nns where ' \
+    query = 'SELECT wv_nn.word, wv_nn.tsne_x, wv_nn.tsne_y, wv_nn.tsne_z FROM ' \
+            'wordvec wv_target, wordvec wv_nn, word_nearest_neighbors nns WHERE ' \
             'wv_target.id = nns.wordid and wv_nn.id = nns.neighborid and ' \
-            'wv_target.word = %s'
+            'wv_target.word = %s ORDER BY nns.neighbor_rank'
     cur.execute(query, (query_word,))
     json_data['neighbors'] = []
-    while True:
+    for i in range(num_nns):
         res = cur.fetchone()
         if res is None:
             break
@@ -94,11 +94,11 @@ def nn_coords_by_word(db_host, db_user, db_pass, db_name, query_word):
     return json_data
 
 
-def nn_coords_by_word_list(db_host, db_user, db_pass, db_name, words):
+def nn_coords_by_word_list(db_host, db_user, db_pass, db_name, words, num_nns):
     json_data = []
     for word in words:
         json_data.append(
-            nn_coords_by_word(db_host, db_user, db_pass, db_name, word));
+            nn_coords_by_word(db_host, db_user, db_pass, db_name, word, num_nns));
     return json_data
 
 

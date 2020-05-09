@@ -30,8 +30,21 @@
     </head>
     <body>
         <h1>Rap Datavis</h1>
-        <input type="text" id="myInput">
-        <button type="button" id="myBtn">Show Value</button>
+        <input type="text" id="words_query">
+        <span>Number of nearest neighbors:</span>
+        <select name="num_nns" id="num_nns_query">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5" selected>5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10</option>
+        </select>
+        <button type="button" id="myBtn">Search Words</button>
         <div id="my_dataviz"></div>
     </body>
 </html>

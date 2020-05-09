@@ -57,7 +57,8 @@ $(document).ready(function() {
   }
 
   $("#myBtn").click(function(){
-    var text_input = $("#myInput").val();
+    var text_input = $("#words_query").val();
+    var num_nns_input = $("#num_nns_query").val();
     console.log('1');
     $.getJSON($SCRIPT_ROOT + '/_get_top5s', {
         words: text_input
@@ -68,7 +69,8 @@ $(document).ready(function() {
       }, function(histos) {
         console.log('3');
         $.getJSON($SCRIPT_ROOT + '/_get_neighbors', {
-            words: text_input
+            words: text_input,
+            num_nns: num_nns_input
         }, function(neighbors) {
           console.log('4');
           for (var i=0; i < histos.length; i++) {
@@ -243,8 +245,6 @@ $(document).ready(function() {
       .style("stroke", "black")
       .style("fill", "none")
       .style("stroke-width", 0.3);
-
-    nn_data.neighbors = nn_data.neighbors.slice(0,7);
 
     // center data around target word
     for (var i=0; i < nn_data.neighbors.length; i++) {

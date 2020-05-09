@@ -42,10 +42,12 @@ def get_histos():
 @app.route('/_get_neighbors')
 def get_neighbors():
     words_arg = request.args.get("words")
+    num_nns = int(request.args.get("num_nns"))
     words = [w.strip() for w in words_arg.split(',')]
     return json.dumps(get_from_db.nn_coords_by_word_list(
             app.config.get('db_host'), app.config.get('db_user'),
-            app.config.get('db_pass'), app.config.get('db_name'), words))
+            app.config.get('db_pass'), app.config.get('db_name'),
+            words, num_nns))
 
 
 if __name__ == "__main__":
