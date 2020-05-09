@@ -227,6 +227,7 @@ $(document).ready(function() {
       zLine = [], beta = 0, alpha = 0, key = function(d){ return d.id; },
       startAngle = Math.PI/4, h=140, w = 250;
     var svg    = d3.select('#my_dataviz').append('svg')
+      .attr('class', 'nnsContainer')
       .attr("width", w)
       .attr("height", h)
       .call(d3.drag().on('drag',
