@@ -1,5 +1,41 @@
 $(document).ready(function() {
 
+  $("#myBtn").click(function(){
+    var text_input = $("#words_query").val();
+    var num_nns_input = $("#num_nns_query").val();
+    console.log('1');
+    $.getJSON($SCRIPT_ROOT + '/_get_top5s', {
+        words: text_input
+    }, function(myfreqs) {
+      console.log('2');
+      $.getJSON($SCRIPT_ROOT + '/_get_histos', {
+          words: text_input
+      }, function(histos) {
+        console.log('3');
+        $.getJSON($SCRIPT_ROOT + '/_get_neighbors', {
+            words: text_input,
+            num_nns: num_nns_input
+        }, function(neighbors) {
+          console.log('4');
+          for (var i=0; i < histos.length; i++) {
+            $('#my_dataviz').append('<br/><span>' + histos[i].word + '</span><br/>');
+            if (myfreqs[i].freqs.length > 0) {
+              add_barchart(myfreqs[i].freqs);
+              if (i < histos.length) {
+                add_histo(histos[i].histo);
+              }
+              if (i < neighbors.length) {
+                add_nns(neighbors[i]);
+              }
+            } else {
+              $('#my_dataviz').append('<span style="color:red">no data</span><br/>');
+            }
+          }
+        });
+      });
+    });
+  });
+
   function add_barchart(data) {
     // set the dimensions and margins of the graph
     var bar_margin = {top: 20, right: 30, bottom: 40, left: 90},
@@ -48,42 +84,6 @@ $(document).ready(function() {
       .attr("height", y.bandwidth() )
       .attr("fill", "#8525e5")
   }
-
-  $("#myBtn").click(function(){
-    var text_input = $("#words_query").val();
-    var num_nns_input = $("#num_nns_query").val();
-    console.log('1');
-    $.getJSON($SCRIPT_ROOT + '/_get_top5s', {
-        words: text_input
-    }, function(myfreqs) {
-      console.log('2');
-      $.getJSON($SCRIPT_ROOT + '/_get_histos', {
-          words: text_input
-      }, function(histos) {
-        console.log('3');
-        $.getJSON($SCRIPT_ROOT + '/_get_neighbors', {
-            words: text_input,
-            num_nns: num_nns_input
-        }, function(neighbors) {
-          console.log('4');
-          for (var i=0; i < histos.length; i++) {
-            $('#my_dataviz').append('<br/><span>' + histos[i].word + '</span><br/>');
-            if (myfreqs[i].freqs.length > 0) {
-              add_barchart(myfreqs[i].freqs);
-              if (i < histos.length) {
-                add_histo(histos[i].histo);
-              }
-              if (i < neighbors.length) {
-                add_nns(neighbors[i]);
-              }
-            } else {
-              $('#my_dataviz').append('<span style="color:red">no data</span><br/>');
-            }
-          }
-        });
-      });
-    });
-  });
 
   function add_histo(data) {
     // adapted from https://www.d3-graph-gallery.com/graph/line_cursor.html
