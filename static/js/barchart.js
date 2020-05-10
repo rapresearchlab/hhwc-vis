@@ -1,14 +1,22 @@
 $(document).ready(function() {
 
-  // set the dimensions and margins of the graph
-  var bar_margin = {top: 20, right: 30, bottom: 40, left: 90},
-      width = 300 - bar_margin.left - bar_margin.right,
-      height = 120 - bar_margin.top - bar_margin.bottom;
+  function add_barchart(data) {
+    // set the dimensions and margins of the graph
+    var bar_margin = {top: 20, right: 30, bottom: 40, left: 90},
+        width = 300 - bar_margin.left - bar_margin.right,
+        height = 120 - bar_margin.top - bar_margin.bottom;
 
-  function make_barch(data, svg) {
-    var biggest_bar = data[0].count;
+    // append the svg object to the body of the page
+    var svg = d3.select("#my_dataviz")
+      .append("svg")
+        .attr("width", width + bar_margin.left + bar_margin.right)
+        .attr("height", height + bar_margin.top + bar_margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + bar_margin.left + "," + bar_margin.top + ")");
 
     // Add X axis
+    var biggest_bar = data[0].count;
     var x = d3.scaleLinear()
       .domain([0, biggest_bar])
       .range([ 0, width]);
@@ -41,21 +49,6 @@ $(document).ready(function() {
       .attr("fill", "#8525e5")
   }
 
-  function add_barch(datum) {
-    // based on https://www.d3-graph-gallery.com/graph/barplot_horizontal.html
-
-    // append the svg object to the body of the page
-    var svg = d3.select("#my_dataviz")
-      .append("svg")
-        .attr("width", width + bar_margin.left + bar_margin.right)
-        .attr("height", height + bar_margin.top + bar_margin.bottom)
-      .append("g")
-        .attr("transform",
-              "translate(" + bar_margin.left + "," + bar_margin.top + ")");
-
-    make_barch(datum.freqs, svg);
-  }
-
   $("#myBtn").click(function(){
     var text_input = $("#words_query").val();
     var num_nns_input = $("#num_nns_query").val();
@@ -76,7 +69,7 @@ $(document).ready(function() {
           for (var i=0; i < histos.length; i++) {
             $('#my_dataviz').append('<br/><span>' + histos[i].word + '</span><br/>');
             if (myfreqs[i].freqs.length > 0) {
-              add_barch(myfreqs[i]);
+              add_barchart(myfreqs[i].freqs);
               if (i < histos.length) {
                 add_histo(histos[i].histo);
               }
