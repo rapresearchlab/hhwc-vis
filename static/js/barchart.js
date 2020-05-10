@@ -154,7 +154,7 @@ $(document).ready(function() {
         .append('circle')
           .style("fill", "none")
           .attr("stroke", "black")
-          .attr('r', 8.5)
+          .attr('r', 5)
           .style("opacity", 0)
 
       // Create the text that travels along the curve of chart
@@ -205,7 +205,7 @@ $(document).ready(function() {
           .attr("cy", y(selectedData.count))
         focusText
           .html(selectedData.year + ": " + selectedData.count + " uses")
-          .attr("x", x(selectedData.year)+15)
+          .attr("x", x(selectedData.year)+11.5)
           .attr("y", y(selectedData.count))
         }
       function mouseout() {
