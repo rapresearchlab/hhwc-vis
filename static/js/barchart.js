@@ -20,12 +20,12 @@ $(document).ready(function() {
           for (var i=0; i < histos.length; i++) {
             $('#my_dataviz').append('<br/><span>' + histos[i].word + '</span><br/>');
             if (myfreqs[i].freqs.length > 0) {
-              add_barchart(myfreqs[i].freqs);
+              add_barchart(myfreqs[i].freqs, {'width': 300, 'height': 120});
               if (i < histos.length) {
-                add_histo(histos[i].histo);
+                add_histo(histos[i].histo, {'width': 400, 'height': 120});
               }
               if (i < neighbors.length) {
-                add_nns(neighbors[i]);
+                add_nns(neighbors[i], {'width': 250, 'height': 140});
               }
             } else {
               $('#my_dataviz').append('<span style="color:red">no data</span><br/>');
@@ -36,11 +36,11 @@ $(document).ready(function() {
     });
   });
 
-  function add_barchart(data) {
+  function add_barchart(data, size) {
     // set the dimensions and margins of the graph
     var bar_margin = {top: 20, right: 30, bottom: 40, left: 90},
-        width = 300 - bar_margin.left - bar_margin.right,
-        height = 120 - bar_margin.top - bar_margin.bottom;
+        width = size.width - bar_margin.left - bar_margin.right,
+        height = size.height - bar_margin.top - bar_margin.bottom;
 
     // append the svg object to the body of the page
     var svg = d3.select("#my_dataviz")
@@ -85,7 +85,7 @@ $(document).ready(function() {
       .attr("fill", "#8525e5")
   }
 
-  function add_histo(data) {
+  function add_histo(data, size) {
     // adapted from https://www.d3-graph-gallery.com/graph/line_cursor.html
 
     var xMin = 1973;
@@ -105,8 +105,8 @@ $(document).ready(function() {
 
     // set the dimensions and margins of the graph
     var margin = {top: 20, right: 130, bottom: 40, left: 60},
-        width = 400 - margin.left - margin.right,
-        height = 120 - margin.top - margin.bottom;
+        width = size.width - margin.left - margin.right,
+        height = size.height - margin.top - margin.bottom;
 
     // append the svg object to the body of the page
     var svg = d3.select("#my_dataviz")
@@ -210,7 +210,7 @@ $(document).ready(function() {
 
   }
 
-  function add_nns(nn_data) {
+  function add_nns(nn_data, size) {
     //  nn_data: {
     //      query: {word, x, y, z}
     //      neighbors: [
@@ -220,7 +220,7 @@ $(document).ready(function() {
     //https://bl.ocks.org/Niekes/1c15016ae5b5f11508f92852057136b5
     var origin = [100, 70], j = 10, scale = 8, scatter = [], xLine = [], yLine = [],
       zLine = [], beta = 0, alpha = 0, key = function(d){ return d.id; },
-      startAngle = Math.PI/4, h=140, w = 250;
+      startAngle = Math.PI/4, h=size.height, w = size.width;
     var svg    = d3.select('#my_dataviz').append('svg')
       .attr('class', 'nnsContainer')
       .attr("width", w)
