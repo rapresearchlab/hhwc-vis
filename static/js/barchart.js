@@ -246,14 +246,31 @@ $(document).ready(function() {
       .style("fill", "none")
       .style("stroke-width", 0.3);
 
-    // center data around target word
-    for (var i=0; i < nn_data.neighbors.length; i++) {
-      nn_data.neighbors[i].x -= nn_data.query.x;
-      nn_data.neighbors[i].y -= nn_data.query.y;
-      nn_data.neighbors[i].z -= nn_data.query.z;
+    var center;
+    if ($('#nns_origin_at').val() == 'centroid') {
+      center = {};
+      for (const dim of ['x', 'y', 'z']) {
+        sum = nn_data.query[dim];
+        for (const nn of nn_data.neighbors) {
+          sum += nn[dim];
+        }
+        center[dim] = sum / (nn_data.neighbors.length + 1);
+      }
+    } else {
+      center = {'x': nn_data.query.x, 'y': nn_data.query.y, 'z': nn_data.query.z};
     }
 
-    var mag_max = 0;
+    // center data around target word
+    for (const dim of ['x', 'y', 'z']) {
+      nn_data.query[dim] -= center[dim];
+      for (var i=0; i < nn_data.neighbors.length; i++) {
+        nn_data.neighbors[i][dim] -= center[dim];
+      }
+    }
+
+    var query_magnitude = Math.sqrt(nn_data.query.x ** 2 +
+              nn_data.query.y ** 2 + nn_data.query.z ** 2);
+    var mag_max = query_magnitude;
     for (var i=0; i < nn_data.neighbors.length; i++) {
       var pt = nn_data.neighbors[i];
       var magnitude = Math.sqrt(pt.x ** 2 + pt.y ** 2 + pt.z ** 2);
@@ -399,9 +416,9 @@ $(document).ready(function() {
         scatter = [], yLine = [];
 
         scatter.push({
-          x: 0,
-          y: 0,
-          z: 0,
+          x: nn_data.query.x,
+          y: nn_data.query.y,
+          z: nn_data.query.z,
           label: nn_data.query.word,
           id: 'point_0'});
 
