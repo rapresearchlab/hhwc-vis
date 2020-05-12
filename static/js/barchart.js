@@ -39,7 +39,7 @@ $(document).ready(function() {
                 add_histo(histos[i].histo, {'width': 400, 'height': 120});
               }
               if (i < neighbors.length) {
-                add_nns(neighbors[i], {'width': 250, 'height': 140});
+                add_nns(neighbors[i], {'width': 250, 'height': 140}, cursorStatus, 200);
               }
             } else {
               $('#my_dataviz').append('<span style="color:red">no data</span><br/>');
@@ -248,7 +248,7 @@ $(document).ready(function() {
 
   }
 
-  function add_nns(nn_data, size) {
+  function add_nns(nn_data, size, cursorStatus, numBackgroundDots) {
     //  nn_data: {
     //      query: {word, x, y, z}
     //      neighbors: [
@@ -258,7 +258,7 @@ $(document).ready(function() {
     //https://bl.ocks.org/Niekes/1c15016ae5b5f11508f92852057136b5
     var j = 10, scale = 8, scatter = [], xLine = [], yLine = [],
       zLine = [], beta = 0, alpha = 0, key = function(d){ return d.id; },
-      startAngle = Math.PI/4, h=size.height, w = size.width;
+      startAngle = Math.PI/4, h=size.height, w = size.width, backgroundDots = [];
     var origin = [w * 0.4, h/2];
     var svg    = d3.select('#my_dataviz').append('svg')
       .attr('class', 'nnsContainer')
@@ -322,8 +322,11 @@ $(document).ready(function() {
     maxFontScale.clamp(true);
     var zToFont = d3.scaleLinear().domain([-mag_max, mag_max])
         .range([minFontScale(h), maxFontScale(h)]);
+    // 100 is just arbitrary high val, we just need to clamp min size
+    var positive = d3.scaleLinear().domain([0.5, 100]).range([0.5, 100])
+    positive.clamp(true);
     var fontSize = function(d) {
-      return zToFont(d.rotated.z);
+      return positive(zToFont(d.rotated.z));
     }
     var pointSize = function(d) {
       return fontSize(d) / 3;
@@ -349,12 +352,12 @@ $(document).ready(function() {
 
         /* ----------- POINTS ----------- */
 
-        var points = svg.selectAll('circle').data(data[0], key);
+        var points = svg.selectAll('circle.main').data(data[0], key);
 
         points
             .enter()
             .append('circle')
-            .attr('class', '_3d')
+            .attr('class', '_3d main')
             .attr('opacity', 0)
             .attr('cx', posPointX)
             .attr('cy', posPointY)
@@ -368,6 +371,29 @@ $(document).ready(function() {
             .attr('cy', posPointY);
 
         points.exit().remove();
+
+        /* ----------- GRAY BG POINTS ----------- */
+
+        var pointsBG = svg.selectAll('circle.bg').data(data[4], key);
+
+        pointsBG
+            .enter()
+            .append('circle')
+            .attr('class', '_3d bg')
+            .attr('opacity', 0)
+            .attr('cx', posPointX)
+            .attr('cy', posPointY)
+            .merge(pointsBG)
+            .transition().duration(tt)
+            .attr('r', function(d) { return pointSize(d) + "px" })
+            .attr('fill', '#4e3864')
+            // disappear the points if they're closer than origin
+            .attr('opacity', function(d)
+                {if (d.rotated.z < 0) {return 0.25} else {return 0}})
+            .attr('cx', posPointX)
+            .attr('cy', posPointY);
+
+        pointsBG.exit().remove();
 
         /* ----------- POINT TEXT ----------- */
 
@@ -475,6 +501,18 @@ $(document).ready(function() {
                 id: 'point_' + (i + 1)});
         }
 
+        backgroundDots = [];
+        function backgroundDotRange() {
+          return (Math.random() * mag_max * 2 - mag_max) * 4;
+        }
+        for (var i=0; i < numBackgroundDots; i++) {
+          backgroundDots.push(
+            {x: backgroundDotRange(),
+              y: backgroundDotRange(),
+              z: backgroundDotRange()
+            })
+        }
+
         xLine = [[0,0,0], [j,0,0]];
         yLine = [[0,0,0], [0,-j,0]];
         zLine = [[0,0,0], [0,0,j]];
@@ -484,6 +522,7 @@ $(document).ready(function() {
             yScale3d([xLine]),
             yScale3d([yLine]),
             yScale3d([zLine]),
+            point3d(backgroundDots)
         ];
 
         processData(data, 1000);
@@ -519,6 +558,7 @@ $(document).ready(function() {
             yScale3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)([xLine]),
             yScale3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)([yLine]),
             yScale3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)([zLine]),
+            point3d.rotateY(beta + startAngle).rotateX(alpha - startAngle)(backgroundDots)
         ];
         processData(data, 0);
     }
