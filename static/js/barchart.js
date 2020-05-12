@@ -38,7 +38,18 @@ $(document).ready(function() {
 
   function add_barchart(data, size) {
     // set the dimensions and margins of the graph
-    var bar_margin = {top: 20, right: 30, bottom: 40, left: 90},
+
+    var bottom_scale = d3.scaleLinear().domain([120, 160]).range([40, 50]);
+    bottom_scale.clamp(true);
+    var bottom_margin = bottom_scale(size.height);
+    var left_scale = d3.scaleLinear().domain([90, 160]).range([75, 130]);
+    left_scale.clamp(true);
+    var left_margin = left_scale(size.height);
+    var font_scale = d3.scaleLinear().domain([90, 160]).range([8, 14]);
+    font_scale.clamp(true);
+    var font_points = font_scale(size.height);
+
+    var bar_margin = {top: 20, right: 30, bottom: bottom_margin, left: left_margin},
         width = size.width - bar_margin.left - bar_margin.right,
         height = size.height - bar_margin.top - bar_margin.bottom;
 
@@ -62,6 +73,7 @@ $(document).ready(function() {
       .call(d3.axisBottom(x).ticks(8))
       .selectAll("text")
         .attr("transform", "translate(-10,0)rotate(-45)")
+        .attr("font-size", font_points + "px")
         .style("text-anchor", "end");
 
     // Y axis
@@ -72,6 +84,7 @@ $(document).ready(function() {
 
     svg.append("g")
       .call(d3.axisLeft(y))
+        .attr("font-size", font_points + "px")
 
     //Bars
     svg.selectAll("myRect")
@@ -87,6 +100,14 @@ $(document).ready(function() {
 
   function add_histo(data, size) {
     // adapted from https://www.d3-graph-gallery.com/graph/line_cursor.html
+
+    var right_scale = d3.scaleLinear().domain([80, 160]).range([100, 180]);
+    right_scale.clamp(true);
+    var right_margin = right_scale(size.height);
+    var font_scale = d3.scaleLinear().domain([90, 160]).range([8, 14]);
+    font_scale.clamp(true);
+    var font_points = font_scale(size.height);
+
 
     var xMin = 1973;
     var xMax = 2020;
@@ -104,7 +125,7 @@ $(document).ready(function() {
     }
 
     // set the dimensions and margins of the graph
-    var margin = {top: 20, right: 130, bottom: 40, left: 60},
+    var margin = {top: 20, right: right_margin, bottom: 40, left: 60},
         width = size.width - margin.left - margin.right,
         height = size.height - margin.top - margin.bottom;
 
@@ -128,7 +149,8 @@ $(document).ready(function() {
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(x)
           .tickFormat(d3.format("d"))
-          .ticks(6));
+          .ticks(6))
+        .attr("font-size", font_points + "px");
 
       // Add Y axis
       var y = d3.scaleLinear()
@@ -136,7 +158,8 @@ $(document).ready(function() {
         .range([ height, 0 ]);
       svg.append("g")
         .call(d3.axisLeft(y)
-        .ticks(4));
+        .ticks(4))
+      .attr("font-size", font_points + "px");
 
       // This allows to find the closest X index of the mouse:
       var bisect = d3.bisector(function(d) { return d.year; }).left;
@@ -155,6 +178,7 @@ $(document).ready(function() {
         .append('g')
         .append('text')
           .style("opacity", 0)
+          .attr("font-size", (font_points + 2) + "px")
           .attr("text-anchor", "left")
           .attr("alignment-baseline", "middle")
 
@@ -218,9 +242,10 @@ $(document).ready(function() {
     //      ]
     //  }
     //https://bl.ocks.org/Niekes/1c15016ae5b5f11508f92852057136b5
-    var origin = [100, 70], j = 10, scale = 8, scatter = [], xLine = [], yLine = [],
+    var j = 10, scale = 8, scatter = [], xLine = [], yLine = [],
       zLine = [], beta = 0, alpha = 0, key = function(d){ return d.id; },
       startAngle = Math.PI/4, h=size.height, w = size.width;
+    var origin = [w * 0.4, h/2];
     var svg    = d3.select('#my_dataviz').append('svg')
       .attr('class', 'nnsContainer')
       .attr("width", w)
@@ -272,7 +297,21 @@ $(document).ready(function() {
       }
     }
 
-    scale = 100 / mag_max;
+    var zoom_scale = d3.scaleLinear().domain([100, 300]).range([50, 150])
+    scale = zoom_scale(h) / mag_max;
+
+    var minFontScale = d3.scaleLinear().domain([80, 160]).range([7, 10]);
+    minFontScale.clamp(true);
+    var maxFontScale = d3.scaleLinear().domain([80, 208]).range([11, 19]);
+    maxFontScale.clamp(true);
+    var zToFont = d3.scaleLinear().domain([-mag_max, mag_max])
+        .range([minFontScale(h), maxFontScale(h)]);
+    var fontSize = function(d) {
+      return zToFont(d.rotated.z);
+    }
+    var pointSize = function(d) {
+      return fontSize(d) / 3;
+    }
 
     var point3d = d3._3d()
         .x(function(d){ return d.x; })
@@ -295,10 +334,6 @@ $(document).ready(function() {
         /* ----------- POINTS ----------- */
 
         var points = svg.selectAll('circle').data(data[0], key);
-
-        var pointSize = function(d) {
-          return 4 + d.rotated.z / 12;
-        }
 
         points
             .enter()
@@ -334,13 +369,13 @@ $(document).ready(function() {
             .attr("dy", function(d) { return pointSize(d) * 1.2 + "px" })
             .attr('class', 'shadow')
           .text(function(d) {return d.label})
-            .attr("font-size", function(d){ return pointSize(d) * 3 + "px"});
+            .attr("font-size", function(d){ return fontSize(d) + "px"});
 
         pointText.append("text")
             .attr("dx", function(d) { return pointSize(d) * 1.2 + "px" })
             .attr("dy", function(d) { return pointSize(d) * 1.2 + "px" })
           .text(function(d) {return d.label})
-            .attr("font-size", function(d){ return pointSize(d) * 3 + "px"});
+            .attr("font-size", function(d){ return fontSize(d) + "px"});
 
         pointText.exit().remove();
 
