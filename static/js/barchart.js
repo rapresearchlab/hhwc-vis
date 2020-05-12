@@ -1,5 +1,19 @@
 $(document).ready(function() {
 
+  var cursorStatus = {
+    hovering: false,
+    dragging: false,
+  }
+  var cursorUpdate = function(cursorStatus) {
+    if (cursorStatus.dragging) {
+      $('html,body').css('cursor','grabbing');
+    } else if (cursorStatus.hovering) {
+      $('html,body').css('cursor','grab');
+    } else {
+      $('html,body').css('cursor','auto');
+    }
+  }
+
   $("#myBtn").click(function(){
     var text_input = $("#words_query").val();
     var num_nns_input = $("#num_nns_query").val();
@@ -250,6 +264,8 @@ $(document).ready(function() {
       .attr('class', 'nnsContainer')
       .attr("width", w)
       .attr("height", h)
+        .on("mouseover", hoverStart)
+        .on("mouseout", hoverEnd)
       .call(d3.drag().on('drag',
       dragged).on('start', dragStart).on('end', dragEnd)).append('g');
     var color  = d3.scaleOrdinal(d3.schemeCategory20);
@@ -476,9 +492,21 @@ $(document).ready(function() {
         point3d.rotateY(startAngle).rotateX(startAngle)(scatter);
     }
 
+    function hoverStart(){
+      cursorStatus.hovering = true;
+      cursorUpdate(cursorStatus);
+    }
+
+    function hoverEnd(){
+      cursorStatus.hovering = false;
+      cursorUpdate(cursorStatus);
+    }
+
     function dragStart(){
         mx = d3.event.x;
         my = d3.event.y;
+        cursorStatus.dragging = true;
+      cursorUpdate(cursorStatus);
     }
 
     function dragged(){
@@ -498,6 +526,8 @@ $(document).ready(function() {
     function dragEnd(){
         mouseX = d3.event.x - mx + mouseX;
         mouseY = d3.event.y - my + mouseY;
+        cursorStatus.dragging = false;
+      cursorUpdate(cursorStatus);
     }
 
     init();
