@@ -1,5 +1,10 @@
 $(document).ready(function() {
 
+  /*
+   * Global state of mouse cursor, re whether it is currently dragging, or
+   * hovering over, any instance of the Nearest Neighbors visualization.
+   * Update function changes the cursor style accordingly.
+   */
   var cursorStatus = {
     hovering: false,
     dragging: false,
@@ -14,6 +19,10 @@ $(document).ready(function() {
     }
   }
 
+  /*
+   * Testing code; fetches JSON from server for query words from html form;
+   * calls visualization functions, lays them out on-screen in a basic way.
+   */
   $("#myBtn").click(function(){
     var text_input = $("#words_query").val();
     var num_nns_input = $("#num_nns_query").val();
@@ -50,6 +59,16 @@ $(document).ready(function() {
     });
   });
 
+  /**
+   * Create bar chart of top users of a word, and how many times each uses it.
+   * Add to #my_dataviz div.
+   *
+   * params:
+   *    data: [{artist: string, count: int}]
+   *        list of artists, and their usage counts for word
+   *    size: int
+   *        size of viz in pixels.  includes margins
+   */
   function add_barchart(data, size) {
     // set the dimensions and margins of the graph
 
@@ -112,6 +131,15 @@ $(document).ready(function() {
       .attr("fill", "#8525e5")
   }
 
+  /**
+   * Create line chart of word-usage-over-time data.  Append to #my_dataviz div.
+   *
+   * params:
+   *    data: [{year: int, count: int}]
+   *        year, and number of times word was used that year
+   *    size: int
+   *        size of vizualisation in pixels.  includes margins.
+   */
   function add_histo(data, size) {
     // adapted from https://www.d3-graph-gallery.com/graph/line_cursor.html
 
@@ -248,14 +276,27 @@ $(document).ready(function() {
 
   }
 
+  /**
+   * Add 3d visualization of word and nearest neighbors.  Append to
+   * #my_dataviz div.
+   *
+   * params:
+   *    nn_data:
+   *        {query: {word, x, y, z}
+   *            neighbors [
+   *                {word, x, y, z}
+   *            ]
+   *        }
+   *    size: {width: int, height: int}
+   *        size of viz in pixels.  this one has no built-in margins,
+   *        as there are no ticks, numbers etc outside the bounding box.
+   *    cursorStatus: {hovering: boolean, dragging: boolean}
+   *        global mouse state vis-a-vis any instance of NN viz.
+   *    numBackgroundDots: int
+   *        number of random gray background dots rendered
+   */
   function add_nns(nn_data, size, cursorStatus, numBackgroundDots) {
-    //  nn_data: {
-    //      query: {word, x, y, z}
-    //      neighbors: [
-    //          {word, x, y, z}
-    //      ]
-    //  }
-    //https://bl.ocks.org/Niekes/1c15016ae5b5f11508f92852057136b5
+    // adapted from https://bl.ocks.org/Niekes/1c15016ae5b5f11508f92852057136b5
     var j = 10, scale = 8, scatter = [], xLine = [], yLine = [],
       zLine = [], beta = 0, alpha = 0, key = function(d){ return d.id; },
       startAngle = Math.PI/4, h=size.height, w = size.width, backgroundDots = [];
@@ -280,6 +321,7 @@ $(document).ready(function() {
       .style("fill", "none")
       .style("stroke-width", 0.3);
 
+    // center origin at target word or centroid of points
     var center;
     if ($('#nns_origin_at').val() == 'centroid') {
       center = {};
@@ -293,8 +335,6 @@ $(document).ready(function() {
     } else {
       center = {'x': nn_data.query.x, 'y': nn_data.query.y, 'z': nn_data.query.z};
     }
-
-    // center data around target word
     for (const dim of ['x', 'y', 'z']) {
       nn_data.query[dim] -= center[dim];
       for (var i=0; i < nn_data.neighbors.length; i++) {
@@ -302,6 +342,7 @@ $(document).ready(function() {
       }
     }
 
+    // scale zoom level for size of viz, and range of data
     var query_magnitude = Math.sqrt(nn_data.query.x ** 2 +
               nn_data.query.y ** 2 + nn_data.query.z ** 2);
     var mag_max = query_magnitude;
@@ -312,10 +353,10 @@ $(document).ready(function() {
         mag_max = magnitude;
       }
     }
-
     var zoom_scale = d3.scaleLinear().domain([100, 300]).range([50, 150])
     scale = zoom_scale(h) / mag_max;
 
+    // scale dots & labels for size of viz and distance from camera
     var minFontScale = d3.scaleLinear().domain([80, 160]).range([7, 10]);
     minFontScale.clamp(true);
     var maxFontScale = d3.scaleLinear().domain([80, 208]).range([11, 19]);
