@@ -109,15 +109,11 @@ $(document).ready(function() {
         .attr("font-size", font_points + "px")
         .style("text-anchor", "end");
 
-    // Y axis
+    // Y axis scale
     var y = d3.scaleBand()
       .range([ 0, height ])
       .domain(data.map(function(d) { return d.artist; }))
       .padding(.1);
-
-    svg.append("g")
-      .call(d3.axisLeft(y))
-        .attr("font-size", font_points + "px")
 
     //Bars
     svg.selectAll("myRect")
@@ -129,6 +125,11 @@ $(document).ready(function() {
       .attr("width", function(d) { return x(d.count); })
       .attr("height", y.bandwidth() )
       .attr("fill", "#8525e5")
+
+    // draw Y axis (after bars so they don't overlap it
+    svg.append("g")
+      .call(d3.axisLeft(y))
+        .attr("font-size", font_points + "px")
   }
 
   /**
@@ -212,7 +213,7 @@ $(document).ready(function() {
         .append('circle')
           .style("fill", "none")
           .attr("stroke", "black")
-          .attr('r', 5)
+          .attr('r', 4)
           .style("opacity", 0)
 
       // Create the text that travels along the curve of chart
@@ -474,7 +475,7 @@ $(document).ready(function() {
             .merge(xScale)
             .attr('stroke', 'red')
             .attr('stroke-width', 0.75)
-            .attr('opacity', 0.75)
+            .attr('opacity', 0.5)
             .attr('d', yScale3d.draw);
 
         xScale.exit().remove();
@@ -490,7 +491,7 @@ $(document).ready(function() {
             .merge(yScale)
             .attr('stroke', 'green')
             .attr('stroke-width', 0.75)
-            .attr('opacity', 0.75)
+            .attr('opacity', 0.5)
             .attr('d', yScale3d.draw);
 
         yScale.exit().remove();
@@ -506,7 +507,7 @@ $(document).ready(function() {
             .merge(zScale)
             .attr('stroke', 'blue')
             .attr('stroke-width', 0.75)
-            .attr('opacity', 0.75)
+            .attr('opacity', 0.5)
             .attr('d', yScale3d.draw);
 
         zScale.exit().remove();
