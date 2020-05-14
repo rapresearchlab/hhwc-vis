@@ -65,6 +65,37 @@ def nns_by_word(db_host, db_user, db_pass, db_name, query_word):
 
 
 def nn_coords_by_word(db_host, db_user, db_pass, db_name, query_word, num_nns):
+    '''Get nearest neighbor words of query_word from db, and the T-SNE
+        coordinates of the neighbor words and query_word.  Return as
+        a dict which can be serialized to JSON.
+
+    params:
+        db_host, db_user, db_pass, db_name: standard MySQL conn arguments
+        query_word: word to find nearest neighbors of.
+        num_nns: maximum number of neighbors to return
+
+    returns:
+        If query_word is in the DB, return JSONifiable dict in the following
+        format:
+            {
+                query: {
+                    word: string
+                    x: float
+                    y: float
+                    z: float
+                },
+                neighbors: [{
+                    word: string
+                    x: float
+                    y: float
+                    z: float
+                }]
+            }
+        Length of neighbors will be the minimum of 'num_nns' and the number
+        of neighbors found in the DB (should be 10).
+
+        If query_word is not in the DB, return empty dict {}.
+    '''
     json_data = {}
     con = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
             database=db_name)
@@ -95,6 +126,30 @@ def nn_coords_by_word(db_host, db_user, db_pass, db_name, query_word, num_nns):
 
 
 def nn_coords_by_word_list(db_host, db_user, db_pass, db_name, words, num_nns):
+    '''Calls nn_coords_by_word for each word in 'words' param.  Returns list of
+        all results (serializable to JSON array)..
+
+    params:
+        words: list of words of which to find nearest neighbors.
+        all other params: passed to nn_coords_by_word; see that function's spec.
+
+    returns:
+        A JSONifiable list of return values of nn_coords_by_word, i.e.
+            [{
+                query: {
+                    word: string
+                    x: float
+                    y: float
+                    z: float
+                },
+                neighbors: [{
+                    word: string
+                    x: float
+                    y: float
+                    z: float
+                }]
+            }]
+    '''
     json_data = []
     for word in words:
         json_data.append(
