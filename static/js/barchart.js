@@ -258,7 +258,14 @@ $(document).ready(function() {
       function mousemove() {
         // recover coordinate we need
         var x0 = x.invert(d3.mouse(this)[0]);
-        var i = bisect(data, x0, 1);
+        // add a coord for nothing so bisector can see lowest year point
+        var dataWithBounds = [{year: data[0].year - 1, count: 0}].concat(data);
+        // '-1' due to prepended point on dataWithBounds
+        var i = bisect(dataWithBounds, x0, 1) - 1;
+        // bisect can return one point beyond the range
+        if (i >= data.length) {
+          i = data.length - 1;
+        }
         selectedData = data[i]
         focus
           .attr("cx", x(selectedData.year))
