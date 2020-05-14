@@ -216,15 +216,6 @@ $(document).ready(function() {
           .attr('r', 4)
           .style("opacity", 0)
 
-      // Create the text that travels along the curve of chart
-      var focusText = svg
-        .append('g')
-        .append('text')
-          .style("opacity", 0)
-          .attr("font-size", (font_points + 2) + "px")
-          .attr("text-anchor", "left")
-          .attr("alignment-baseline", "middle")
-
       // Add the line
       svg
         .append("path")
@@ -236,6 +227,26 @@ $(document).ready(function() {
           .x(function(d) { return x(d.year) })
           .y(function(d) { return y(d.count) })
           )
+
+      // White drop shadow for focusText
+      // (also must be drawn after the data line to work)
+      var focusTextShadow = svg
+        .append('g')
+        .append('text')
+            .attr('class', 'shadow')
+          .style("opacity", 0)
+          .attr("font-size", (font_points + 2) + "px")
+          .attr("text-anchor", "left")
+          .attr("alignment-baseline", "middle")
+
+      // Create the text that travels along the curve of chart
+      var focusText = svg
+        .append('g')
+        .append('text')
+          .style("opacity", 0)
+          .attr("font-size", (font_points + 2) + "px")
+          .attr("text-anchor", "left")
+          .attr("alignment-baseline", "middle")
 
       // Create a rect on top of the svg area: this rectangle recovers mouse position
       svg
@@ -252,6 +263,7 @@ $(document).ready(function() {
       // What happens when the mouse move -> show the annotations at the right positions.
       function mouseover() {
         focus.style("opacity", 1)
+        focusTextShadow.style("opacity",1)
         focusText.style("opacity",1)
       }
 
@@ -270,6 +282,10 @@ $(document).ready(function() {
         focus
           .attr("cx", x(selectedData.year))
           .attr("cy", y(selectedData.count))
+        focusTextShadow
+          .html(selectedData.year + ": " + selectedData.count + " uses")
+          .attr("x", x(selectedData.year)+11.5)
+          .attr("y", y(selectedData.count))
         focusText
           .html(selectedData.year + ": " + selectedData.count + " uses")
           .attr("x", x(selectedData.year)+11.5)
@@ -278,6 +294,7 @@ $(document).ready(function() {
       function mouseout() {
         focus.style("opacity", 0)
         focusText.style("opacity", 0)
+        focusTextShadow.style("opacity", 0)
       }
     }
     run();
