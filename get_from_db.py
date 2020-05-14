@@ -157,35 +157,6 @@ def nn_coords_by_word_list(db_host, db_user, db_pass, db_name, words, num_nns):
     return json_data
 
 
-def histos(db_host, db_user, db_pass, db_name, limit=None):
-    # XXX this doesn't get data by artist, it just gets db lines,
-    #  so it doesn't get full histogram for a given artist; hence
-    #  somewhat useless
-    json_data = []
-    con = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
-            database=db_name)
-    cur = con.cursor()
-    query = 'SELECT wordvec.word, wh.year, wh.count from ' \
-            'wordvec, word_histogram wh where wordvec.id = wh.wordid'
-    if limit is None:
-        cur.execute(query)
-    else:
-        query += ' limit %s'
-        cur.execute(query, (limit,))
-    while True:
-        res = cur.fetchone()
-        if res is None:
-            break
-        word, year, count = res
-        for i in range(len(json_data)):
-            if json_data[i]['word'] == word:
-                datum['histo'].append({'year': year, 'count': count})
-                break
-            if i == len(json_data) - 1:
-                # we're at the end so this histo is new
-                json_data[i]['histo'] = []
-    return json_data
-
 def histo_by_word(db_host, db_user, db_pass, db_name, word):
     json_data = []
     con = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
