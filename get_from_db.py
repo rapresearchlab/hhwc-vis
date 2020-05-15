@@ -79,15 +79,15 @@ def nn_coords_by_word(db_host, db_user, db_pass, db_name, query_word, num_nns):
         format:
             {
                 query: {
-                    word: string
-                    x: float
-                    y: float
+                    word: string,
+                    x: float,
+                    y: float,
                     z: float
                 },
                 neighbors: [{
-                    word: string
-                    x: float
-                    y: float
+                    word: string,
+                    x: float,
+                    y: float,
                     z: float
                 }]
             }
@@ -127,7 +127,7 @@ def nn_coords_by_word(db_host, db_user, db_pass, db_name, query_word, num_nns):
 
 def nn_coords_by_word_list(db_host, db_user, db_pass, db_name, words, num_nns):
     '''Calls nn_coords_by_word for each word in 'words' param.  Returns list of
-        all results (serializable to JSON array)..
+        all results (serializable to JSON array).
 
     params:
         words: list of words of which to find nearest neighbors.
@@ -157,7 +157,21 @@ def nn_coords_by_word_list(db_host, db_user, db_pass, db_name, words, num_nns):
     return json_data
 
 
+
 def histo_by_word(db_host, db_user, db_pass, db_name, word):
+    '''Get usage-count-over-time in rap lyrics for a given word, from the
+        database.  Return a list which can be serialized to JSON.
+
+    params:
+        db_host, db_user, db_pass, db_name: standard MySQL conn arguments
+        word: string; find usage-over-time for this word in DB.
+
+    returns:
+        If 'word' param is in the database, return list:
+            [{year: int, count: int}]
+
+        If 'word' is not in the DB, return empty list [].
+    '''
     json_data = []
     con = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
             database=db_name)
@@ -199,6 +213,18 @@ def histo_by_some_words(db_host, db_user, db_pass, db_name, limit = None):
 
 
 def histo_by_word_list(db_host, db_user, db_pass, db_name, words):
+    '''Calls histo_by_words for each word in words list.
+
+    params:
+        db_host, db_user, db_pass, db_name: standard MySQL conn arguments
+        words: [string].  List of words to run 'histo_by_word' on.
+
+    returns:
+        List of counts-by-year from histo_by_word, which may be serialized
+        to JSON:
+            [[{year: int, count: int}]]
+
+    '''
     json_data = []
     for word in words:
         json_data.append({'word': word, 'histo':
@@ -256,6 +282,20 @@ def word_freqs(db_host, db_user, db_pass, db_name, limit = None):
 
 
 def word_freqs_by_word(db_host, db_user, db_pass, db_name, word):
+    '''Given a word, get from the DB the top five artists who have used that
+        word the most, and the number of times each has used it.  Return as
+        a list which can be serialized to JSON.
+
+    params:
+        db_host, db_user, db_pass, db_name: standard MySQL conn arguments.
+        word: word of which to find top five users and their counts.
+
+    returns:
+        If 'word' is in the DB, return JSONifiable list in the following format:
+            [{artist: string, count: int}]
+
+        If 'word is not in DB, return empty list [].
+    '''
     json_data = []
     con = mysql.connect(host=db_host, user=db_user, passwd=db_pass,
             database=db_name)
@@ -280,6 +320,16 @@ def word_freqs_by_word(db_host, db_user, db_pass, db_name, word):
 
 
 def freqs_by_word_list(db_host, db_user, db_pass, db_name, words):
+    '''Call word_freqs_by_word on every word in a list.
+
+    params:
+        db_host, db_user, db_pass, db_name: standard MySQL conn arguments.
+        words: list of words to pass to word_freqs_by_word
+
+    returns:
+        List of lists of top-5 users from word_freqs_by_word, i.e.:
+            [[{artist: string, count: int}]]
+    '''
     json_data = []
     for word in words:
         json_data.append({'word': word, 'freqs':
