@@ -133,26 +133,31 @@ $(document).ready(function() {
       .call(d3.axisLeft(y))
         .attr("font-size", font_points + "px")
 
-    var detailTextZone = svg.append("g")
+    var detailTextZone = svg.append("foreignObject")
         .attr('transform', 'translate(' + (-margin.left)  + ',' +
           (height + margin.top + 20) + ')')
-        .attr('x', size.width)
-        .attr('y', 40);
+        .attr('width', size.width)
+        .attr('height', 40);
 
-    var detailText = detailTextZone.append('text')
-        .attr('font-size', font_points + 'px')
+    var detailText = detailTextZone.append('xhtml:div')
+        .style('font-size', font_points + 'px')
 
     // What happens when the mouse move -> show the annotations at the right positions.
     function mouseover(d) {
+      console.log('hi');
       detailText
         .style("opacity", 1)
-        detailText.text("artist: " + d.artist + " \n exact value: " + d.count +
+        .html("artist: " + d.artist + " | exact value: " + d.count +
         " | total # songs: " + d.numSongs);
+      d3.select(this)
+        .style('fill', '#4e3864')
     }
 
     function mouseout(d) {
       detailText
         .style("opacity", 0);
+      d3.select(this)
+        .style('fill', '#8525e5')
     }
   }
 
