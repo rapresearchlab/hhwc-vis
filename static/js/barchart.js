@@ -82,18 +82,18 @@ $(document).ready(function() {
     font_scale.clamp(true);
     var font_points = font_scale(size.height);
 
-    var bar_margin = {top: 20, right: 30, bottom: bottom_margin, left: left_margin},
-        width = size.width - bar_margin.left - bar_margin.right,
-        height = size.height - bar_margin.top - bar_margin.bottom;
+    var margin = {top: 20, right: 30, bottom: bottom_margin, left: left_margin},
+        width = size.width - margin.left - margin.right,
+        height = size.height - margin.top - margin.bottom;
 
     // append the svg object to the body of the page
     var svg = d3.select("#my_dataviz")
       .append("svg")
-        .attr("width", width + bar_margin.left + bar_margin.right)
-        .attr("height", height + bar_margin.top + bar_margin.bottom)
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
       .append("g")
         .attr("transform",
-              "translate(" + bar_margin.left + "," + bar_margin.top + ")");
+              "translate(" + margin.left + "," + margin.top + ")");
 
     // Add X axis
     var biggest_bar = data[0].count;
