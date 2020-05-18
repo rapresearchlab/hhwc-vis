@@ -72,7 +72,7 @@ $(document).ready(function() {
   function add_barchart(data, size) {
     // set the dimensions and margins of the graph
 
-    var bottom_scale = d3.scaleLinear().domain([120, 160]).range([40, 50]);
+    var bottom_scale = d3.scaleLinear().domain([120, 160]).range([70, 80]);
     bottom_scale.clamp(true);
     var bottom_margin = bottom_scale(size.height);
     var left_scale = d3.scaleLinear().domain([90, 160]).range([75, 130]);
@@ -82,7 +82,7 @@ $(document).ready(function() {
     font_scale.clamp(true);
     var font_points = font_scale(size.height);
 
-    var margin = {top: 20, right: 30, bottom: bottom_margin, left: left_margin},
+    var margin = {top: 10, right: 30, bottom: bottom_margin, left: left_margin},
         width = size.width - margin.left - margin.right,
         height = size.height - margin.top - margin.bottom;
 
@@ -125,11 +125,35 @@ $(document).ready(function() {
       .attr("width", function(d) { return x(d.count); })
       .attr("height", y.bandwidth() )
       .attr("fill", "#8525e5")
+        .on("mouseover", mouseover)
+        .on("mouseout", mouseout)
 
     // draw Y axis (after bars so they don't overlap it
     svg.append("g")
       .call(d3.axisLeft(y))
         .attr("font-size", font_points + "px")
+
+    var detailTextZone = svg.append("g")
+        .attr('transform', 'translate(' + (-margin.left)  + ',' +
+          (height + margin.top + 20) + ')')
+        .attr('x', size.width)
+        .attr('y', 40);
+
+    var detailText = detailTextZone.append('text')
+        .attr('font-size', font_points + 'px')
+
+    // What happens when the mouse move -> show the annotations at the right positions.
+    function mouseover(d) {
+      detailText
+        .style("opacity", 1)
+        detailText.text("artist: " + d.artist + " \n exact value: " + d.count +
+        " | total # songs: " + d.numSongs);
+    }
+
+    function mouseout(d) {
+      detailText
+        .style("opacity", 0);
+    }
   }
 
   /**

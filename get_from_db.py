@@ -161,7 +161,7 @@ def word_freqs_by_word(db_host, db_user, db_pass, db_name, word):
 
     returns:
         If 'word' is in the DB, return JSONifiable list in the following format:
-            [{artist: string, count: int}]
+            [{artist: string, count: int, numSongs: int}]
 
         If 'word is not in DB, return empty list [].
     '''
@@ -178,12 +178,13 @@ def word_freqs_by_word(db_host, db_user, db_pass, db_name, word):
     if res is not None:
         for i in range(len(res) - 5):
             artistID = res[i]
-            cur.execute('SELECT artist FROM artist WHERE artistid=%s',
+            cur.execute('SELECT artist.artist, count(song.songid) FROM song, artist ' \
+                    'WHERE artist.artistid=%s and song.artistid = artist.artistid',
                     (artistID,))
-            artist = cur.fetchone()[0]
+            artist, numSongs = cur.fetchone()
             count = res[i + 5]
             print('    %s: %d' % (artist, count))
-            json_data.append({'artist': artist, 'count': count})
+            json_data.append({'artist': artist, 'count': count, 'numSongs': numSongs})
     con.close()
     return json_data
 
