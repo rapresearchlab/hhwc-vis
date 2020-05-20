@@ -72,7 +72,7 @@ $(document).ready(function() {
   function add_barchart(data, size) {
     // set the dimensions and margins of the graph
 
-    var bottom_scale = d3.scaleLinear().domain([120, 160]).range([70, 80]);
+    var bottom_scale = d3.scaleLinear().domain([120, 160]).range([60, 70]);
     bottom_scale.clamp(true);
     var bottom_margin = bottom_scale(size.height);
     var left_scale = d3.scaleLinear().domain([90, 160]).range([75, 130]);
@@ -137,7 +137,7 @@ $(document).ready(function() {
         .attr('transform', 'translate(' + (-margin.left)  + ',' +
           (height + margin.top + 20) + ')')
         .attr('width', size.width)
-        .attr('height', 40);
+        .attr('height', 30); // does this actually add up correctly
 
     var detailText = detailTextZone.append('xhtml:div')
         .style('font-size', font_points + 'px')
