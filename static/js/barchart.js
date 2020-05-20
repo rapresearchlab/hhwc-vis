@@ -147,8 +147,7 @@ $(document).ready(function() {
       console.log('hi');
       detailText
         .style("opacity", 1)
-        .html("artist: " + d.artist + " | exact value: " + d.count +
-        " | total # songs: " + d.numSongs);
+        .html(d.artist + ", " + d.count + " refs in " + d.numSongs + " songs");
       d3.select(this)
         .style('fill', '#4e3864')
     }
