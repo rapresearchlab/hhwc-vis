@@ -154,7 +154,8 @@ $(document).ready(function() {
 
     function mouseout(d) {
       detailText
-        .style("opacity", 0);
+        .style("opacity", 0)
+        .html("");
       d3.select(this)
         .style('fill', '#8525e5')
     }
