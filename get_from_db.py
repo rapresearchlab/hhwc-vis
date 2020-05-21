@@ -98,7 +98,7 @@ def nn_coords_by_word_list(db_host, db_user, db_pass, db_name, words, num_nns):
 
 
 
-def histo_by_word(db_host, db_user, db_pass, db_name, word):
+def history_by_word(db_host, db_user, db_pass, db_name, word):
     '''Get usage-count-over-time in rap lyrics for a given word, from the
         database.  Return a list which can be serialized to JSON.
 
@@ -128,29 +128,29 @@ def histo_by_word(db_host, db_user, db_pass, db_name, word):
     return json_data
 
 
-def histo_by_word_list(db_host, db_user, db_pass, db_name, words):
-    '''Calls histo_by_words for each word in words list.
+def histories_by_word_list(db_host, db_user, db_pass, db_name, words):
+    '''Calls history_by_words for each word in words list.
 
     params:
         db_host, db_user, db_pass, db_name: standard MySQL conn arguments
-        words: [string].  List of words to run 'histo_by_word' on.
+        words: [string].  List of words to run 'history_by_word' on.
 
     returns:
-        List of query word and counts-by-year from histo_by_word, which
+        List of query word and counts-by-year from history_by_word, which
         may be serialized to JSON:
             [{
                 word: string,
-                histo: [{year: int, count: int}]
+                history: [{year: int, count: int}]
             }]
     '''
     json_data = []
     for word in words:
-        json_data.append({'word': word, 'histo':
-            histo_by_word(db_host, db_user, db_pass, db_name, word)});
+        json_data.append({'word': word, 'history':
+            history_by_word(db_host, db_user, db_pass, db_name, word)});
     return json_data
 
 
-def word_freqs_by_word(db_host, db_user, db_pass, db_name, word):
+def top_users_by_word(db_host, db_user, db_pass, db_name, word):
     '''Given a word, get from the DB the top five artists who have used that
         word the most, and the number of times each has used it.  Return as
         a list which can be serialized to JSON.
@@ -189,25 +189,25 @@ def word_freqs_by_word(db_host, db_user, db_pass, db_name, word):
     return json_data
 
 
-def freqs_by_word_list(db_host, db_user, db_pass, db_name, words):
-    '''Call word_freqs_by_word on every word in a list.
+def top_users_by_word_list(db_host, db_user, db_pass, db_name, words):
+    '''Call top_users_by_word on every word in a list.
 
     params:
         db_host, db_user, db_pass, db_name: standard MySQL conn arguments.
-        words: list of words to pass to word_freqs_by_word
+        words: list of words to pass to top_users_by_word
 
     returns:
-        List of query word and list of top-5 users from word_freqs_by_word,
+        List of query word and list of top-5 users from top_users_by_word,
             i.e.:
             [{
                 word: string,
-                freqs: [{artist: string, count: int}]
+                top_users: [{artist: string, count: int}]
             }]
     '''
     json_data = []
     for word in words:
-        json_data.append({'word': word, 'freqs':
-            word_freqs_by_word(db_host, db_user, db_pass, db_name, word)});
+        json_data.append({'word': word, 'top_users':
+            top_users_by_word(db_host, db_user, db_pass, db_name, word)});
     return json_data
 
 
@@ -216,7 +216,7 @@ def json_to_file(json_data, filename):
         outfile.write(json.dumps(json_data))
 
 
-# words that might have either interesting histo or interesting top artists
+# words that might have either interesting history or interesting top artists
 some_sample_words = ['jump', 'iphone', 'insta', 'snapchat', 'iraq', 'palestine',
         'drip', 'slatt', 'snoop', 'chronic', 'insta', 'snapchat', 'jiggy', 'cadillac',
         'basedgod', 'yeezy', 'love', 'death', 'compton', 'rosecrans', 'east', 'west',
@@ -232,10 +232,10 @@ if __name__=="__main__":
             db_host, db_user, db_pass, db_name, some_sample_words, 10)
     json_to_file(sample_nns, 'sample_nns.json')
     
-    sample_word_freqs = freqs_by_word_list(db_host, db_user, db_pass, db_name,
+    sample_top_users = top_users_by_word_list(db_host, db_user, db_pass, db_name,
             some_sample_words)
-    json_to_file(sample_word_freqs, 'sample_word_freqs.json')
+    json_to_file(sample_top_users, 'sample_top_users.json')
 
-    sample_histos = histo_by_word_list(db_host, db_user, db_pass, db_name,
+    sample_histories = histories_by_word_list(db_host, db_user, db_pass, db_name,
             some_sample_words)
-    json_to_file(sample_histos, 'sample_histos.json')
+    json_to_file(sample_histories, 'sample_histories.json')

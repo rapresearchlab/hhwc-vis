@@ -25,16 +25,16 @@ def get_top5s():
     print('get_top5s')
     words_arg = request.args.get("words")
     words = [w.strip() for w in words_arg.split(',')]
-    return json.dumps(get_from_db.freqs_by_word_list(
+    return json.dumps(get_from_db.top_users_by_word_list(
             app.config.get('db_host'), app.config.get('db_user'),
             app.config.get('db_pass'), app.config.get('db_name'), words))
 
 
-@app.route('/_get_histos')
-def get_histos():
+@app.route('/_get_histories')
+def get_histories():
     words_arg = request.args.get("words")
     words = [w.strip() for w in words_arg.split(',')]
-    return json.dumps(get_from_db.histo_by_word_list(
+    return json.dumps(get_from_db.histories_by_word_list(
             app.config.get('db_host'), app.config.get('db_user'),
             app.config.get('db_pass'), app.config.get('db_name'), words))
 

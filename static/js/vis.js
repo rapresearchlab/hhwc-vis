@@ -30,23 +30,23 @@ $(document).ready(function() {
       console.log('1');
       $.getJSON($SCRIPT_ROOT + '/_get_top5s', {
           words: text_input
-      }, function(myfreqs) {
+      }, function(top_users_lists) {
         console.log('2');
-        $.getJSON($SCRIPT_ROOT + '/_get_histos', {
+        $.getJSON($SCRIPT_ROOT + '/_get_histories', {
             words: text_input
-        }, function(histos) {
+        }, function(histories) {
           console.log('3');
           $.getJSON($SCRIPT_ROOT + '/_get_neighbors', {
               words: text_input,
               num_nns: num_nns_input
           }, function(neighbors) {
             console.log('4');
-            for (var i=0; i < histos.length; i++) {
-              $('#my_dataviz').append('<br/><span>' + histos[i].word + '</span><br/>');
-              if (myfreqs[i].freqs.length > 0) {
-                add_barchart(myfreqs[i].freqs, histos[i].word, {'width': 300, 'height': 130});
-                if (i < histos.length) {
-                  add_histo(histos[i].histo, {'width': 400, 'height': 120});
+            for (var i=0; i < histories.length; i++) {
+              $('#my_dataviz').append('<br/><span>' + histories[i].word + '</span><br/>');
+              if (top_users_lists[i].top_users.length > 0) {
+                add_top_users(top_users_lists[i].top_users, histories[i].word, {'width': 300, 'height': 130});
+                if (i < histories.length) {
+                  add_word_history(histories[i].history, {'width': 400, 'height': 120});
                 }
                 if (i < neighbors.length) {
                   add_nns(neighbors[i], {'width': 250, 'height': 140}, cursorStatus, 200);
@@ -73,7 +73,7 @@ $(document).ready(function() {
    *    size: int
    *        size of viz in pixels.  includes margins
    */
-  function add_barchart(data, queryWord, size) {
+  function add_top_users(data, queryWord, size) {
     // set the dimensions and margins of the graph
 
     var bottom_scale = d3.scaleLinear().domain([120, 160]).range([60, 70]);
@@ -174,7 +174,7 @@ $(document).ready(function() {
    *    size: int
    *        size of vizualisation in pixels.  includes margins.
    */
-  function add_histo(data, size) {
+  function add_word_history(data, size) {
     // adapted from https://www.d3-graph-gallery.com/graph/line_cursor.html
 
     var right_scale = d3.scaleLinear().domain([80, 160]).range([100, 180]);
