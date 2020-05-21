@@ -26,37 +26,39 @@ $(document).ready(function() {
   $("#myBtn").click(function(){
     var text_input = $("#words_query").val();
     var num_nns_input = $("#num_nns_query").val();
-    console.log('1');
-    $.getJSON($SCRIPT_ROOT + '/_get_top5s', {
-        words: text_input
-    }, function(myfreqs) {
-      console.log('2');
-      $.getJSON($SCRIPT_ROOT + '/_get_histos', {
+    if ($.trim(text_input) !== '') {
+      console.log('1');
+      $.getJSON($SCRIPT_ROOT + '/_get_top5s', {
           words: text_input
-      }, function(histos) {
-        console.log('3');
-        $.getJSON($SCRIPT_ROOT + '/_get_neighbors', {
-            words: text_input,
-            num_nns: num_nns_input
-        }, function(neighbors) {
-          console.log('4');
-          for (var i=0; i < histos.length; i++) {
-            $('#my_dataviz').append('<br/><span>' + histos[i].word + '</span><br/>');
-            if (myfreqs[i].freqs.length > 0) {
-              add_barchart(myfreqs[i].freqs, {'width': 300, 'height': 120});
-              if (i < histos.length) {
-                add_histo(histos[i].histo, {'width': 400, 'height': 120});
+      }, function(myfreqs) {
+        console.log('2');
+        $.getJSON($SCRIPT_ROOT + '/_get_histos', {
+            words: text_input
+        }, function(histos) {
+          console.log('3');
+          $.getJSON($SCRIPT_ROOT + '/_get_neighbors', {
+              words: text_input,
+              num_nns: num_nns_input
+          }, function(neighbors) {
+            console.log('4');
+            for (var i=0; i < histos.length; i++) {
+              $('#my_dataviz').append('<br/><span>' + histos[i].word + '</span><br/>');
+              if (myfreqs[i].freqs.length > 0) {
+                add_barchart(myfreqs[i].freqs, histos[i].word, {'width': 300, 'height': 130});
+                if (i < histos.length) {
+                  add_histo(histos[i].histo, {'width': 400, 'height': 120});
+                }
+                if (i < neighbors.length) {
+                  add_nns(neighbors[i], {'width': 250, 'height': 140}, cursorStatus, 200);
+                }
+              } else {
+                $('#my_dataviz').append('<span style="color:red">no data</span><br/>');
               }
-              if (i < neighbors.length) {
-                add_nns(neighbors[i], {'width': 250, 'height': 140}, cursorStatus, 200);
-              }
-            } else {
-              $('#my_dataviz').append('<span style="color:red">no data</span><br/>');
             }
-          }
+          });
         });
       });
-    });
+    }
   });
 
   /**
@@ -66,10 +68,12 @@ $(document).ready(function() {
    * params:
    *    data: [{artist: string, count: int}]
    *        list of artists, and their usage counts for word
+   *    queryWord: string
+   *        the original query that 'data' pertains to
    *    size: int
    *        size of viz in pixels.  includes margins
    */
-  function add_barchart(data, size) {
+  function add_barchart(data, queryWord, size) {
     // set the dimensions and margins of the graph
 
     var bottom_scale = d3.scaleLinear().domain([120, 160]).range([60, 70]);
@@ -147,7 +151,7 @@ $(document).ready(function() {
       console.log('hi');
       detailText
         .style("opacity", 1)
-        .html(d.artist + ", " + d.count + " refs in " + d.numSongs + " songs");
+        .html(d.artist + " says \"" + queryWord + "\" " + d.count + " times in " + d.numSongs + " songs");
       d3.select(this)
         .style('fill', '#4e3864')
     }
