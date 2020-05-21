@@ -10,6 +10,9 @@
         * {
             font-family: WILLIAM-regular;
         }
+        .option {
+            font-size: 14px;
+        }
         h1, #my_dataviz, #query_form {
             margin-left: 21px;
         }
@@ -34,7 +37,8 @@
         <div id="query_form">
             <span>Query words (comma separated)</span>
             <input type="text" id="words_query">
-            <span>Number of nearest neighbors:</span>
+            <button type="button" id="myBtn">Search Words</button>
+            <br/>
             <select name="num_nns" id="num_nns_query">
               <option value="1">1</option>
               <option value="2">2</option>
@@ -47,12 +51,12 @@
               <option value="9">9</option>
               <option value="10">10</option>
             </select>
-            <span>Nearest Neighbors origin at:</span>
+            <span class="option">nearest neighbors; </span>
             <select name="num_nns" id="nns_origin_at">
               <option value="centroid" selected>centroid</option>
               <option value="query">query word</option>
             </select>
-            <button type="button" id="myBtn">Search Words</button>
+            <span class="option">origin</span>
         </div>
         <div id="my_dataviz"></div>
     </body>
