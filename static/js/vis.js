@@ -1,5 +1,20 @@
 $(document).ready(function() {
 
+  var help_string =
+    `<p>We applied the t-SNE algorithm to 468,165 English language lyrics from the Rap Almanac database to find patterns and word clusters based on similarity.</p>
+<p>Type a word in the search field, or multiple words separated by commas and you'll get:</p>
+    <ul>
+<li>A histogram featuring the top five users of your query word, and how often they used it.</li>
+<li>A time series graph that shows its use over time (1979 to present).</li>
+<li>A 3D nearest-neighbor visualization that shows other words that are closely associated with yours.</li>
+    </ul>`
+  $("#help_anchor").mouseover(function () {
+    $("#help_text").html(help_string);
+  })
+  $("#help_anchor").mouseout(function () {
+    $("#help_text").html("<br/>");
+  })
+
   /*
    * Global state of mouse cursor, re whether it is currently dragging, or
    * hovering over, any instance of the Nearest Neighbors visualization.
