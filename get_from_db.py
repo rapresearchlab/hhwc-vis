@@ -52,7 +52,7 @@ def nn_coords_by_word(db_host, db_user, db_pass, db_name, query_word, num_nns):
     # store the TSNE coords in the response.  ALSO, get the target coords
     query = 'SELECT wv_nn.word, wv_nn.tsne_x, wv_nn.tsne_y, wv_nn.tsne_z FROM ' \
             'wordvec wv_target, wordvec wv_nn, word_nearest_neighbors nns WHERE ' \
-            'wv_target.id = nns.wordid and wv_nn.id = nns.neighborid and ' \
+            'wv_target.wordvecid = nns.wordid and wv_nn.wordvecid = nns.neighborid and ' \
             'wv_target.word = %s ORDER BY nns.neighbor_rank'
     cur.execute(query, (query_word,))
     json_data['neighbors'] = []
@@ -117,7 +117,7 @@ def history_by_word(db_host, db_user, db_pass, db_name, word):
             database=db_name)
     cur = con.cursor()
     query = 'SELECT wh.year, wh.count from wordvec, word_histogram wh ' \
-            'where wordvec.id = wh.wordid and wordvec.word = %s'
+            'where wordvec.wordvecid = wh.wordid and wordvec.word = %s'
     cur.execute(query, (word,))
     while True:
         res = cur.fetchone()
